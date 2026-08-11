@@ -1,651 +1,634 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دمج الكرات - Ball Merge Pro</title>
-    <style>
-        :root {
-            --bg: #0a0a14;
-            --surface: #13132b;
-            --primary: #7c4dff;
-            --secondary: #00e5ff;
-            --gold: #ffd740;
-            --danger: #ff5252;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            background: var(--bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-        #game-wrapper {
-            width: 100%;
-            max-width: 500px;
-            height: 100vh;
-            position: relative;
-            background: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a14 70%);
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(124,77,255,0.15);
-        }
-        /* شاشة البداية */
-        #home-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 20px;
-            text-align: center;
-            color: white;
-            z-index: 10;
-            position: relative;
-        }
-        #home-screen h1 {
-            font-size: 42px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #7c4dff, #00e5ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-        #home-screen .subtitle {
-            color: #aaa;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-        .points-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 16px 28px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            color: var(--gold);
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .btn {
-            background: linear-gradient(135deg, #7c4dff, #00e5ff);
-            border: none;
-            color: white;
-            padding: 18px 44px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(124,77,255,0.4);
-            transition: all 0.2s;
-            touch-action: manipulation;
-            letter-spacing: 1px;
-        }
-        .btn:active { transform: scale(0.96); }
-        .btn-sm {
-            padding: 10px 18px;
-            font-size: 14px;
-            border-radius: 20px;
-        }
-        /* شاشة اللعبة */
-        #game-screen {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-            z-index: 5;
-        }
-        #game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(10,10,25,0.7);
-            backdrop-filter: blur(10px);
-            color: white;
-            z-index: 10;
-        }
-        .score-badge {
-            background: linear-gradient(135deg, #7c4dff, #00e5ff);
-            padding: 8px 22px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .energy-badge {
-            background: rgba(255,183,77,0.2);
-            padding: 6px 14px;
-            border-radius: 20px;
-            color: #ffb74d;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        canvas {
-            flex: 1;
-            display: block;
-            touch-action: none;
-        }
-        #game-footer {
-            padding: 10px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(10,10,25,0.7);
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
-        .daily-bar {
-            flex: 1;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            margin: 0 12px;
-            overflow: hidden;
-        }
-        .daily-fill {
-            height: 100%;
-            background: var(--gold);
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-        /* نافذة نهاية اللعبة داخل الكانفاس - سنرسمها عبر الكود */
-        .hidden { display: none !important; }
-        .text-glow {
-            text-shadow: 0 0 20px rgba(124,77,255,0.8);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Reward Game Pro</title>
+  <style>
+    :root {
+      --primary: #7C6BFF;
+      --secondary: #00E5FF;
+      --accent: #FF5E7A;
+      --success: #22C55E;
+      --gold: #FBBF24;
+      --bg: #08080F;
+      --card: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.08);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-tap-highlight-color:transparent; }
+    body { background:var(--bg); color:#fff; min-height:100vh; overflow-x:hidden; }
+    .screen { display:none; max-width:480px; margin:0 auto; min-height:100vh; padding:18px; animation:fade .3s ease; }
+    .screen.active { display:block; }
+    @keyframes fade { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+    /* ===== Common ===== */
+    .btn {
+      width:100%; padding:15px; border:none; border-radius:14px;
+      background:linear-gradient(135deg, var(--primary), #9B7BFF);
+      color:#fff; font-size:15px; font-weight:700; cursor:pointer;
+    }
+    .btn:active { transform:scale(.97); }
+    .btn:disabled { opacity:.45; }
+    .btn-outline { background:transparent; border:1.5px solid var(--primary); color:var(--primary); }
+    .back {
+      background:transparent; border:1px solid var(--border); color:#999;
+      padding:9px 16px; border-radius:11px; font-size:13px; margin-bottom:16px; cursor:pointer;
+    }
+    input {
+      width:100%; padding:15px; margin:8px 0; border:1px solid var(--border);
+      border-radius:14px; background:var(--card); color:#fff; font-size:15px; outline:none;
+    }
+    input:focus { border-color:var(--primary); }
+
+    /* ===== Splash ===== */
+    #splash {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; background:radial-gradient(circle at 50% 40%, #151528 0%, #08080F 70%);
+    }
+    .logo {
+      width:100px; height:100px; border-radius:26px; font-size:44px;
+      background:linear-gradient(135deg, var(--primary), var(--secondary));
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 16px 40px rgba(124,107,255,.4); margin-bottom:20px;
+      animation:pulse 2.2s infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+    .loader {
+      width:32px; height:32px; border:3px solid rgba(124,107,255,.25);
+      border-top-color:var(--primary); border-radius:50%;
+      animation:spin .7s linear infinite; margin-top:36px;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* ===== Home ===== */
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+    .level-pill {
+      background:linear-gradient(135deg, #FBBF24, #F59E0B); color:#111;
+      padding:5px 13px; border-radius:20px; font-size:12px; font-weight:800;
+    }
+    .balance {
+      background:linear-gradient(135deg, #6D5CFF, #00D4FF);
+      border-radius:24px; padding:26px 20px; text-align:center; margin-bottom:20px;
+      box-shadow:0 12px 32px rgba(109,92,255,.3); position:relative; overflow:hidden;
+    }
+    .balance .pts { font-size:48px; font-weight:800; margin:6px 0; letter-spacing:-1px; }
+    .daily {
+      background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.3);
+      border-radius:14px; padding:13px 16px; margin-bottom:18px;
+      display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+    .game-card {
+      background:var(--card); border:1px solid var(--border); border-radius:18px;
+      padding:18px 14px; text-align:center; cursor:pointer; transition:.15s;
+    }
+    .game-card:active { transform:scale(.96); background:rgba(255,255,255,.09); }
+    .game-card .ico { font-size:32px; margin-bottom:8px; }
+    .game-card h4 { font-size:14px; margin-bottom:3px; }
+    .game-card p { font-size:11px; color:#777; }
+    .full-card {
+      background:var(--card); border:1px solid var(--border); border-radius:18px;
+      padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; margin-bottom:10px;
+    }
+    .full-card:active { background:rgba(255,255,255,.08); }
+    .full-card .ico {
+      width:46px; height:46px; border-radius:14px; display:flex;
+      align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
+    }
+
+    /* ===== Game Common ===== */
+    .g-stats { display:flex; gap:8px; margin-bottom:14px; }
+    .g-stat {
+      flex:1; background:var(--card); border-radius:14px; padding:12px; text-align:center;
+    }
+    .g-stat span { display:block; font-size:11px; color:#777; margin-bottom:3px; }
+    .g-stat b { font-size:20px; }
+
+    /* Target Game */
+    .board {
+      background:linear-gradient(180deg,#111122,#0a0a14);
+      border:1px solid var(--border); border-radius:20px; height:360px;
+      position:relative; overflow:hidden; margin-bottom:14px;
+    }
+    .target {
+      position:absolute; border-radius:50%; display:flex; align-items:center;
+      justify-content:center; cursor:pointer; box-shadow:0 0 20px rgba(255,94,122,.5);
+      background:linear-gradient(135deg,#FF5E7A,#FFB347); user-select:none; z-index:5;
+    }
+    .popup {
+      position:absolute; color:#22C55E; font-weight:800; font-size:18px;
+      pointer-events:none; animation:up .7s forwards; z-index:20;
+    }
+    @keyframes up { to{opacity:0; transform:translateY(-45px)} }
+
+    /* Memory */
+    .memory-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;
+    }
+    .card {
+      aspect-ratio:1; background:var(--card); border:1px solid var(--border);
+      border-radius:12px; display:flex; align-items:center; justify-content:center;
+      font-size:26px; cursor:pointer; transition:.2s;
+    }
+    .card.flipped, .card.matched { background:rgba(124,107,255,.2); border-color:var(--primary); }
+    .card.matched { opacity:.6; }
+
+    /* Reaction */
+    .react-area {
+      height:320px; border-radius:20px; display:flex; align-items:center;
+      justify-content:center; font-size:22px; font-weight:700; text-align:center;
+      margin-bottom:14px; transition:background .15s; cursor:pointer; user-select:none;
+    }
+    .react-wait { background:#1a1a2e; color:#888; }
+    .react-go { background:linear-gradient(135deg,#22C55E,#16A34A); color:#fff; }
+    .react-early { background:linear-gradient(135deg,#EF4444,#DC2626); color:#fff; }
+
+    /* Wallet */
+    .w-card {
+      background:linear-gradient(135deg,#151528,#0f0f1c);
+      border:1px solid rgba(124,107,255,.25); border-radius:22px;
+      padding:26px; text-align:center; margin-bottom:20px;
+    }
+    .w-card .big { font-size:36px; font-weight:800; margin:8px 0; }
+    .mini { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
+    .mini div {
+      background:var(--card); border-radius:16px; padding:16px; text-align:center;
+    }
+    .mini .n { font-size:24px; font-weight:700; margin:5px 0; }
+    .msg { text-align:center; padding:12px; border-radius:12px; margin-top:12px; font-size:13px; display:none; }
+    .msg.show { display:block; }
+    .msg.ok { background:rgba(34,197,94,.15); color:#22C55E; }
+    .msg.err { background:rgba(239,68,68,.15); color:#F87171; }
+
+    /* Toast */
+    .toast {
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:#16162a; border:1px solid var(--border); padding:12px 22px;
+      border-radius:40px; font-size:13px; z-index:999; transition:.3s cubic-bezier(.34,1.5,.64,1);
+      box-shadow:0 8px 24px rgba(0,0,0,.4); white-space:nowrap;
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+  </style>
 </head>
 <body>
-<div id="game-wrapper">
-    <!-- الشاشة الرئيسية -->
-    <div id="home-screen">
-        <h1 class="text-glow">⚡ دمج الكرات</h1>
-        <p class="subtitle">أسقط الكرات وادمجها لتحقيق أعلى نتيجة</p>
-        <div class="points-card">💰 رصيدك: <span id="wallet-points">12,500</span> نقطة</div>
-        <button class="btn" id="start-btn">▶ ابدأ اللعبة</button>
-    </div>
 
-    <!-- شاشة اللعبة -->
-    <div id="game-screen">
-        <div id="game-header">
-            <button class="btn btn-sm" id="exit-btn" style="background:rgba(255,255,255,0.15);">✕</button>
-            <div class="score-badge">⭐ <span id="live-score">0</span></div>
-            <div class="energy-badge">⚡ <span id="live-energy">5</span></div>
-        </div>
-        <canvas id="gameCanvas"></canvas>
-        <div id="game-footer">
-            <span style="color:#aaa;font-size:13px;">الهدف اليومي</span>
-            <div class="daily-bar"><div class="daily-fill" id="daily-fill" style="width:30%"></div></div>
-            <span style="color:var(--gold);font-size:13px;" id="daily-text">300/1000</span>
-        </div>
-    </div>
+<!-- SPLASH -->
+<div id="splash" class="screen active">
+  <div class="logo">🎮</div>
+  <h1 style="font-size:26px;font-weight:800">Reward Game</h1>
+  <p style="color:#777;margin-top:6px;font-size:14px">العب • شاهد • اربح</p>
+  <div class="loader"></div>
 </div>
 
+<!-- LOGIN -->
+<div id="login" class="screen">
+  <div style="text-align:center;margin:50px 0 36px">
+    <div style="font-size:56px">👤</div>
+    <h1 style="font-size:24px;font-weight:800;margin-top:10px">مرحباً بك</h1>
+    <p style="color:#777;margin-top:6px">أنشئ حسابك وابدأ</p>
+  </div>
+  <input id="nameIn" placeholder="اسمك" maxlength="18">
+  <input id="emailIn" type="email" placeholder="البريد الإلكتروني">
+  <button class="btn" onclick="login()">دخول / تسجيل</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen">
+  <div class="top-bar">
+    <h2 id="greet" style="font-size:18px">مرحباً</h2>
+    <div class="level-pill" id="lvl">المستوى 1</div>
+  </div>
+
+  <div class="daily" id="dailyBox" onclick="claimDaily()">
+    <div>
+      <div style="font-weight:700;font-size:13px">🎁 مكافأة يومية</div>
+      <div style="font-size:11px;color:#aaa" id="dailyTxt">+60 نقطة</div>
+    </div>
+    <div style="font-size:20px">→</div>
+  </div>
+
+  <div class="balance">
+    <div style="opacity:.85;font-size:13px">رصيدك</div>
+    <div class="pts" id="pts">0</div>
+    <div id="usd" style="font-size:16px">≈ $0.00</div>
+  </div>
+
+  <div style="font-size:13px;color:#888;margin-bottom:10px;font-weight:600">اختر لعبة</div>
+  <div class="grid-2">
+    <div class="game-card" onclick="openTarget()">
+      <div class="ico">🎯</div>
+      <h4>Target Frenzy</h4>
+      <p>اضغط بسرعة</p>
+    </div>
+    <div class="game-card" onclick="openMemory()">
+      <div class="ico">🧠</div>
+      <h4>Memory</h4>
+      <p>طابق البطاقات</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="game-card" onclick="openReact()">
+      <div class="ico">⚡</div>
+      <h4>Reaction</h4>
+      <p>سرعة رد الفعل</p>
+    </div>
+    <div class="game-card" onclick="watchAd()">
+      <div class="ico">▶️</div>
+      <h4>إعلان</h4>
+      <p>+25~45 نقطة</p>
+    </div>
+  </div>
+
+  <div class="full-card" onclick="showRef()">
+    <div class="ico" style="background:rgba(0,229,255,.12)">👥</div>
+    <div>
+      <div style="font-weight:700;font-size:14px">ادعُ أصدقاءك</div>
+      <div style="font-size:12px;color:#777" id="refTxt">كودك: ----</div>
+    </div>
+  </div>
+  <div class="full-card" onclick="showScreen('wallet')">
+    <div class="ico" style="background:rgba(124,107,255,.15)">💰</div>
+    <div>
+      <div style="font-weight:700;font-size:14px">المحفظة والسحب</div>
+      <div style="font-size:12px;color:#777">حول نقاطك إلى مال</div>
+    </div>
+  </div>
+</div>
+
+<!-- TARGET GAME -->
+<div id="target" class="screen">
+  <button class="back" onclick="backHome()">← رجوع</button>
+  <div class="g-stats">
+    <div class="g-stat"><span>النقاط</span><b id="tScore">0</b></div>
+    <div class="g-stat"><span>الوقت</span><b id="tTime">30</b></div>
+    <div class="g-stat"><span>المستوى</span><b id="tLvl">1</b></div>
+  </div>
+  <div class="board" id="tBoard">
+    <div id="tHint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#555;text-align:center;padding:20px;font-size:14px">
+      اضغط ابدأ ثم اضغط على الأهداف<br>كلما ارتفع المستوى صغرت الأهداف
+    </div>
+  </div>
+  <button class="btn" id="tBtn" onclick="startTarget()">ابدأ التحدي</button>
+</div>
+
+<!-- MEMORY GAME -->
+<div id="memory" class="screen">
+  <button class="back" onclick="backHome()">← رجوع</button>
+  <div class="g-stats">
+    <div class="g-stat"><span>النقاط</span><b id="mScore">0</b></div>
+    <div class="g-stat"><span>المحاولات</span><b id="mMoves">0</b></div>
+    <div class="g-stat"><span>الوقت</span><b id="mTime">60</b></div>
+  </div>
+  <div class="memory-grid" id="mGrid"></div>
+  <button class="btn" id="mBtn" onclick="startMemory()">ابدأ الذاكرة</button>
+</div>
+
+<!-- REACTION GAME -->
+<div id="react" class="screen">
+  <button class="back" onclick="backHome()">← رجوع</button>
+  <div class="g-stats">
+    <div class="g-stat"><span>أفضل وقت</span><b id="rBest">—</b></div>
+    <div class="g-stat"><span>المحاولة</span><b id="rTry">0/5</b></div>
+    <div class="g-stat"><span>النقاط</span><b id="rScore">0</b></div>
+  </div>
+  <div class="react-area react-wait" id="rArea" onclick="reactClick()">
+    اضغط ابدأ ثم انتظر اللون الأخضر
+  </div>
+  <button class="btn" id="rBtn" onclick="startReact()">ابدأ الاختبار</button>
+</div>
+
+<!-- WALLET -->
+<div id="wallet" class="screen">
+  <button class="back" onclick="showScreen('home')">← رجوع</button>
+  <div class="w-card">
+    <div style="color:#888;font-size:13px">رصيدك القابل للسحب</div>
+    <div class="big" id="wPts">0</div>
+    <div style="color:var(--secondary);font-size:18px" id="wUsd">≈ $0.00</div>
+  </div>
+  <div class="mini">
+    <div><div>▶️</div><div class="n" id="wAds">0</div><div style="color:#777;font-size:12px">إعلانات</div></div>
+    <div><div>🏦</div><div class="n" id="wWd">0</div><div style="color:#777;font-size:12px">سحوبات</div></div>
+  </div>
+  <div style="font-weight:700;margin-bottom:8px">طلب سحب</div>
+  <p style="color:#666;font-size:12px;margin-bottom:12px">الحد الأدنى 5$ • 1000 نقطة = 1$</p>
+  <input type="number" id="amt" placeholder="المبلغ $" min="5" step="0.5">
+  <button class="btn" onclick="withdraw()">إرسال الطلب</button>
+  <div id="wMsg" class="msg"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-    // ---------- DOM ----------
-    const homeScreen = document.getElementById('home-screen');
-    const gameScreen = document.getElementById('game-screen');
-    const startBtn = document.getElementById('start-btn');
-    const exitBtn = document.getElementById('exit-btn');
-    const walletSpan = document.getElementById('wallet-points');
-    const liveScoreSpan = document.getElementById('live-score');
-    const liveEnergySpan = document.getElementById('live-energy');
-    const dailyFill = document.getElementById('daily-fill');
-    const dailyText = document.getElementById('daily-text');
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+/* ========== DATA ========== */
+let user = null;
+const KEY = 'rgp_v3';
 
-    // ---------- حالة اللعبة ----------
-    let walletPoints = 12500;
-    let score = 0;
-    let energy = 5;
-    let maxEnergy = 5;
-    let dailyGoal = 1000;
-    let dailyProgress = 300;
-    let gameRunning = false;
-    let balls = [];
-    let currentBall = null;
-    let animationId;
-    let gameOverActive = false;
-    let finalScore = 0;
+function load(){ const r=localStorage.getItem(KEY); if(r) user=JSON.parse(r); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(user)); }
+function lvl(){ return Math.floor(user.points/400)+1; }
 
-    // الجسيمات (تأثيرات الدمج)
-    let particles = [];
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='home') renderHome();
+  if(id==='wallet') renderWallet();
+}
 
-    // ألوان الكرات حسب الرقم (1~8+)
-    const colors = ['#FF6B6B','#FF8E53','#FFD93D','#6BCB77','#4D96FF','#7C4DFF','#E040FB','#FF4081'];
-    
-    // ---------- تحجيم الكانفاس ----------
-    function resizeCanvas() {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height - 90;
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+load();
+setTimeout(()=> user ? showScreen('home') : showScreen('login'), 1600);
+
+/* ========== LOGIN ========== */
+function login(){
+  const n=document.getElementById('nameIn').value.trim();
+  const e=document.getElementById('emailIn').value.trim();
+  if(!n||!e) return toast('أدخل الاسم والبريد');
+  user={
+    name:n, email:e, points:100,
+    ads:0, withdraws:0,
+    ref:(n.slice(0,3)+Math.random().toString(36).slice(2,6)).toUpperCase(),
+    lastDaily:null, bestReact:null
+  };
+  save(); toast('تم إنشاء الحساب 🎉'); showScreen('home');
+}
+
+/* ========== HOME ========== */
+function renderHome(){
+  document.getElementById('greet').textContent='مرحباً، '+user.name.split(' ')[0];
+  document.getElementById('lvl').textContent='المستوى '+lvl();
+  document.getElementById('pts').textContent=user.points.toLocaleString();
+  document.getElementById('usd').textContent='≈ $'+(user.points/1000).toFixed(2);
+  document.getElementById('refTxt').textContent='كودك: '+user.ref;
+  const today=new Date().toDateString();
+  const done=user.lastDaily===today;
+  document.getElementById('dailyTxt').textContent=done?'تم المطالبة اليوم ✓':'+60 نقطة جاهزة';
+  document.getElementById('dailyBox').style.opacity=done?.5:1;
+}
+
+function claimDaily(){
+  const today=new Date().toDateString();
+  if(user.lastDaily===today) return toast('طالبت اليوم بالفعل');
+  user.points+=60; user.lastDaily=today; save();
+  renderHome(); toast('+60 نقطة مكافأة يومية 🎁');
+}
+
+function watchAd(){
+  toast('جاري الإعلان...');
+  setTimeout(()=>{
+    const r=25+Math.floor(Math.random()*21);
+    user.points+=r; user.ads++; save();
+    renderHome(); toast('🎉 +'+r+' نقطة');
+  },2600);
+}
+
+function showRef(){
+  if(navigator.share) navigator.share({title:'Reward Game',text:'كود الإحالة: '+user.ref});
+  else { navigator.clipboard?.writeText(user.ref); toast('تم نسخ الكود: '+user.ref); }
+}
+
+function backHome(){ showScreen('home'); }
+
+/* ========== TARGET FRENZY ========== */
+let tScore=0,tTime=30,tLevel=1,tPlay=false,tTimer=null,tCombo=0,tLast=0;
+
+function openTarget(){
+  tPlay=false; tScore=0; tTime=30; tLevel=1;
+  document.getElementById('tScore').textContent=0;
+  document.getElementById('tTime').textContent=30;
+  document.getElementById('tLvl').textContent=1;
+  document.getElementById('tBtn').disabled=false;
+  document.getElementById('tBtn').textContent='ابدأ التحدي';
+  document.getElementById('tHint').style.display='flex';
+  document.querySelectorAll('#tBoard .target').forEach(e=>e.remove());
+  showScreen('target');
+}
+
+function startTarget(){
+  if(tPlay) return;
+  tPlay=true; tScore=0; tTime=30; tLevel=1; tCombo=0;
+  document.getElementById('tHint').style.display='none';
+  document.getElementById('tBtn').disabled=true;
+  document.getElementById('tBtn').textContent='جاري اللعب...';
+  spawnT();
+  tTimer=setInterval(()=>{
+    tTime--;
+    document.getElementById('tTime').textContent=tTime;
+    if(tTime===20||tTime===10){ tLevel++; document.getElementById('tLvl').textContent=tLevel; toast('المستوى '+tLevel); }
+    if(tTime<=0) endTarget();
+  },1000);
+}
+
+function spawnT(){
+  if(!tPlay) return;
+  const board=document.getElementById('tBoard');
+  board.querySelectorAll('.target').forEach(e=>e.remove());
+  const size=Math.max(36,70-tLevel*7);
+  const el=document.createElement('div');
+  el.className='target';
+  el.style.width=size+'px'; el.style.height=size+'px';
+  el.style.fontSize=(size*.4)+'px'; el.textContent='👆';
+  el.style.left=(8+Math.random()*(board.clientWidth-size-16))+'px';
+  el.style.top=(8+Math.random()*(board.clientHeight-size-16))+'px';
+  el.onclick=e=>{
+    if(!tPlay) return;
+    const now=Date.now();
+    tCombo = (now-tLast<550) ? tCombo+1 : 1;
+    tLast=now;
+    const mult=Math.min(tCombo,4);
+    const gain=tLevel*mult;
+    tScore+=gain;
+    document.getElementById('tScore').textContent=tScore;
+    const p=document.createElement('div');
+    p.className='popup'; p.textContent='+'+gain;
+    p.style.left=(e.clientX-board.getBoundingClientRect().left)+'px';
+    p.style.top=(e.clientY-board.getBoundingClientRect().top)+'px';
+    board.appendChild(p); setTimeout(()=>p.remove(),700);
+    spawnT();
+  };
+  board.appendChild(el);
+}
+
+function endTarget(){
+  tPlay=false; clearInterval(tTimer);
+  document.querySelectorAll('#tBoard .target').forEach(e=>e.remove());
+  document.getElementById('tBtn').disabled=false;
+  document.getElementById('tBtn').textContent='العب مرة أخرى';
+  const earn=tScore*2;
+  user.points+=earn; save();
+  setTimeout(()=>toast('انتهت! +'+earn+' نقطة'),200);
+}
+
+/* ========== MEMORY ========== */
+const EMOJIS=['🍎','🍌','🍇','🍊','🍓','🍉','🍒','🥝'];
+let mCards=[], mFlipped=[], mLock=false, mScore=0, mMoves=0, mTime=60, mTimer=null, mPlay=false;
+
+function openMemory(){
+  mPlay=false; mScore=0; mMoves=0; mTime=60;
+  document.getElementById('mScore').textContent=0;
+  document.getElementById('mMoves').textContent=0;
+  document.getElementById('mTime').textContent=60;
+  document.getElementById('mBtn').disabled=false;
+  document.getElementById('mBtn').textContent='ابدأ الذاكرة';
+  document.getElementById('mGrid').innerHTML='';
+  showScreen('memory');
+}
+
+function startMemory(){
+  if(mPlay) return;
+  mPlay=true; mScore=0; mMoves=0; mTime=60; mFlipped=[]; mLock=false;
+  document.getElementById('mBtn').disabled=true;
+  document.getElementById('mBtn').textContent='جاري اللعب...';
+  const pairs=[...EMOJIS,...EMOJIS].sort(()=>Math.random()-.5);
+  const grid=document.getElementById('mGrid');
+  grid.innerHTML='';
+  pairs.forEach((em,i)=>{
+    const c=document.createElement('div');
+    c.className='card'; c.dataset.val=em; c.dataset.idx=i;
+    c.onclick=()=>flip(c);
+    grid.appendChild(c);
+  });
+  mTimer=setInterval(()=>{
+    mTime--; document.getElementById('mTime').textContent=mTime;
+    if(mTime<=0) endMemory(false);
+  },1000);
+}
+
+function flip(card){
+  if(!mPlay||mLock||card.classList.contains('flipped')||card.classList.contains('matched')) return;
+  card.classList.add('flipped');
+  card.textContent=card.dataset.val;
+  mFlipped.push(card);
+  if(mFlipped.length===2){
+    mMoves++; document.getElementById('mMoves').textContent=mMoves;
+    mLock=true;
+    const [a,b]=mFlipped;
+    if(a.dataset.val===b.dataset.val){
+      a.classList.add('matched'); b.classList.add('matched');
+      mScore+=15; document.getElementById('mScore').textContent=mScore;
+      mFlipped=[]; mLock=false;
+      if(document.querySelectorAll('.matched').length===16) endMemory(true);
+    } else {
+      setTimeout(()=>{
+        a.classList.remove('flipped'); a.textContent='';
+        b.classList.remove('flipped'); b.textContent='';
+        mFlipped=[]; mLock=false;
+      },700);
     }
-    window.addEventListener('resize', () => { if(gameRunning) resizeCanvas(); });
+  }
+}
 
-    // ---------- كائن Ball ----------
-    class Ball {
-        constructor(x,y,number) {
-            this.x = x;
-            this.y = y;
-            this.number = number; // 1,2,3...
-            this.value = Math.pow(2, number);
-            this.radius = 22 + number * 3;
-            this.color = colors[(number-1) % colors.length];
-            this.vy = 0;
-            this.vx = 0;
-            this.merged = false;
-        }
-        draw(ctx) {
-            ctx.save();
-            // ظل خارجي
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 15;
-            const grad = ctx.createRadialGradient(this.x-3, this.y-3, 2, this.x, this.y, this.radius);
-            grad.addColorStop(0, '#ffffff');
-            grad.addColorStop(0.4, this.color);
-            grad.addColorStop(1, this.color+'88');
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            // نص الرقم
-            ctx.fillStyle = 'white';
-            ctx.font = `bold ${this.radius*0.65}px 'Segoe UI'`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(this.value, this.x, this.y);
-            ctx.restore();
-        }
-    }
+function endMemory(won){
+  mPlay=false; clearInterval(mTimer);
+  document.getElementById('mBtn').disabled=false;
+  document.getElementById('mBtn').textContent='العب مرة أخرى';
+  let earn=mScore*2;
+  if(won) earn+=40;
+  user.points+=earn; save();
+  toast(won ? 'ممتاز! أكملت اللوحة +'+earn : 'انتهى الوقت +'+earn+' نقطة');
+}
 
-    // ---------- جسيمات ----------
-    class Particle {
-        constructor(x,y,color) {
-            this.x = x; this.y = y;
-            this.vx = (Math.random()-0.5)*4;
-            this.vy = (Math.random()-0.5)*4 - 2;
-            this.life = 1;
-            this.color = color;
-            this.size = Math.random()*4+2;
-        }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.vy += 0.1;
-            this.life -= 0.02;
-        }
-        draw(ctx) {
-            ctx.globalAlpha = this.life;
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-    }
+/* ========== REACTION ========== */
+let rState='idle', rStart=0, rTries=0, rScores=[], rTimeout=null;
 
-    // ---------- خلفية متحركة ----------
-    function drawBackground() {
-        // شبكة باهتة
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-        ctx.lineWidth = 1;
-        const step = 40;
-        for(let x=0; x<canvas.width; x+=step) {
-            ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
-        }
-        for(let y=0; y<canvas.height; y+=step) {
-            ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
-        }
-    }
+function openReact(){
+  rState='idle'; rTries=0; rScores=[];
+  document.getElementById('rBest').textContent=user.bestReact?user.bestReact+'ms':'—';
+  document.getElementById('rTry').textContent='0/5';
+  document.getElementById('rScore').textContent='0';
+  document.getElementById('rArea').className='react-area react-wait';
+  document.getElementById('rArea').textContent='اضغط ابدأ ثم انتظر اللون الأخضر';
+  document.getElementById('rBtn').disabled=false;
+  document.getElementById('rBtn').textContent='ابدأ الاختبار';
+  showScreen('react');
+}
 
-    // ---------- إنشاء كرة جديدة ----------
-    function spawnBall() {
-        if(!gameRunning || gameOverActive) return;
-        if(energy <= 0) {
-            // لا يمكن إسقاط كرة جديدة بدون طاقة
-            currentBall = null;
-            return;
-        }
-        const num = Math.random()<0.7?1:(Math.random()<0.7?2:3);
-        currentBall = new Ball(canvas.width/2, 20, num);
-    }
+function startReact(){
+  if(rState!=='idle'&&rState!=='done') return;
+  rTries=0; rScores=[];
+  document.getElementById('rBtn').disabled=true;
+  nextReact();
+}
 
-    // ---------- إسقاط الكرة ----------
-    function dropBall(x) {
-        if(!currentBall || !gameRunning || gameOverActive || energy<=0) return;
-        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width-currentBall.radius, x));
-        currentBall.vy = 5;
-        balls.push(currentBall);
-        // استهلاك طاقة
-        energy--;
-        liveEnergySpan.textContent = energy;
-        // نقاط الإسقاط
-        score += 5;
-        updateUI();
-        currentBall = null;
-        setTimeout(()=>{
-            if(!gameRunning || gameOverActive) return;
-            checkMerges();
-            checkGameOver();
-            if(!currentBall && energy>0) spawnBall();
-        }, 600);
-    }
+function nextReact(){
+  if(rTries>=5){ endReact(); return; }
+  rState='wait';
+  const area=document.getElementById('rArea');
+  area.className='react-area react-wait';
+  area.textContent='انتظر الأخضر...';
+  const delay=1200+Math.random()*2800;
+  rTimeout=setTimeout(()=>{
+    rState='go';
+    area.className='react-area react-go';
+    area.textContent='اضغط الآن!';
+    rStart=performance.now();
+  },delay);
+}
 
-    // ---------- فحص الدمج ----------
-    function checkMerges() {
-        let merged = false;
-        for(let i=0;i<balls.length;i++) {
-            if(balls[i].merged) continue;
-            for(let j=i+1;j<balls.length;j++) {
-                if(balls[j].merged) continue;
-                if(balls[i].number === balls[j].number) {
-                    const dx = balls[i].x - balls[j].x;
-                    const dy = balls[i].y - balls[j].y;
-                    const dist = Math.sqrt(dx*dx+dy*dy);
-                    if(dist < balls[i].radius + balls[j].radius - 8) {
-                        balls[i].merged = true;
-                        balls[j].merged = true;
-                        const newNum = balls[i].number + 1;
-                        const mx = (balls[i].x+balls[j].x)/2;
-                        const my = (balls[i].y+balls[j].y)/2;
-                        balls.push(new Ball(mx, my, newNum));
-                        score += Math.pow(2, newNum) * 10;
-                        updateUI();
-                        // إضافة جسيمات الدمج
-                        for(let p=0;p<15;p++) {
-                            particles.push(new Particle(mx, my, colors[(newNum-1)%colors.length]));
-                        }
-                        merged = true;
-                    }
-                }
-            }
-        }
-        balls = balls.filter(b=>!b.merged);
-        if(merged) setTimeout(()=>{ if(gameRunning) checkMerges(); }, 250);
-    }
+function reactClick(){
+  const area=document.getElementById('rArea');
+  if(rState==='wait'){
+    clearTimeout(rTimeout);
+    rState='early';
+    area.className='react-area react-early';
+    area.textContent='بدري جداً! انتظر الأخضر';
+    setTimeout(()=>nextReact(),1200);
+    return;
+  }
+  if(rState==='go'){
+    const ms=Math.round(performance.now()-rStart);
+    rScores.push(ms);
+    rTries++;
+    document.getElementById('rTry').textContent=rTries+'/5';
+    area.className='react-area react-wait';
+    area.textContent=ms+'ms';
+    if(rTries>=5) setTimeout(endReact,800);
+    else setTimeout(nextReact,900);
+  }
+}
 
-    // ---------- نهاية اللعبة ----------
-    function checkGameOver() {
-        for(let b of balls) {
-            if(b.y - b.radius < 25) {
-                endGame();
-                return;
-            }
-        }
-    }
+function endReact(){
+  rState='done';
+  document.getElementById('rBtn').disabled=false;
+  document.getElementById('rBtn').textContent='أعد الاختبار';
+  const avg=Math.round(rScores.reduce((a,b)=>a+b,0)/rScores.length);
+  let pts=0;
+  if(avg<250) pts=80;
+  else if(avg<350) pts=55;
+  else if(avg<450) pts=35;
+  else pts=20;
+  user.points+=pts;
+  if(!user.bestReact||avg<user.bestReact) user.bestReact=avg;
+  save();
+  document.getElementById('rBest').textContent=user.bestReact+'ms';
+  document.getElementById('rScore').textContent=pts;
+  document.getElementById('rArea').textContent='المعدل: '+avg+'ms\n+'+pts+' نقطة';
+  toast('معدلك '+avg+'ms • +'+pts+' نقطة');
+}
 
-    function endGame() {
-        if(gameOverActive) return;
-        gameOverActive = true;
-        gameRunning = false;
-        finalScore = score;
-        // تحديث الهدف اليومي
-        dailyProgress = Math.min(dailyGoal, dailyProgress + score);
-        updateDailyUI();
-    }
+/* ========== WALLET ========== */
+function renderWallet(){
+  document.getElementById('wPts').textContent=user.points.toLocaleString()+' نقطة';
+  document.getElementById('wUsd').textContent='≈ $'+(user.points/1000).toFixed(2);
+  document.getElementById('wAds').textContent=user.ads;
+  document.getElementById('wWd').textContent=user.withdraws;
+  document.getElementById('wMsg').className='msg';
+}
 
-    // ---------- رسم نافذة نهاية اللعبة ----------
-    function drawGameOverOverlay() {
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        // صندوق
-        const boxW = 300, boxH = 260;
-        const bx = canvas.width/2 - boxW/2, by = canvas.height/2 - boxH/2;
-        ctx.fillStyle = '#1e1e3a';
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 24); ctx.fill(); ctx.stroke();
-        // نص
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px "Segoe UI"';
-        ctx.textAlign = 'center';
-        ctx.fillText('انتهت اللعبة!', canvas.width/2, by+45);
-        ctx.fillStyle = '#aaa';
-        ctx.font = '18px "Segoe UI"';
-        ctx.fillText(`لقد جمعت ${finalScore} نقطة`, canvas.width/2, by+85);
-        // زر مضاعفة
-        drawButton(canvas.width/2, by+130, 220, 44, '▶ شاهد إعلان لمضاعفتها', '#ffd740', '#ffa000', ()=>{
-            finalScore *= 3;
-            walletPoints += finalScore;
-            walletSpan.textContent = walletPoints.toLocaleString();
-            resetGame();
-        });
-        // زر تخطي
-        drawButton(canvas.width/2, by+185, 180, 40, 'تخطي', '#444', '#333', ()=>{
-            walletPoints += finalScore;
-            walletSpan.textContent = walletPoints.toLocaleString();
-            resetGame();
-        });
-    }
-
-    function drawButton(x,y,w,h,text,color1,color2,onClick) {
-        const bx = x - w/2;
-        ctx.fillStyle = color1;
-        ctx.beginPath(); ctx.roundRect(bx, y-h/2, w, h, 30); ctx.fill();
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 14px "Segoe UI"';
-        ctx.fillText(text, x, y+5);
-        // تخزين منطقة الزر للكشف
-        return {x:bx, y:y-h/2, w, h, onClick};
-    }
-
-    // مصفوفة أزرار مؤقتة
-    let overlayButtons = [];
-    function drawOverlay() {
-        overlayButtons = [];
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        const boxW = 320, boxH = 260;
-        const bx = canvas.width/2 - boxW/2, by = canvas.height/2 - boxH/2;
-        ctx.fillStyle = '#1e1e3a';
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 24); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 26px "Segoe UI"';
-        ctx.fillText('انتهت اللعبة!', canvas.width/2, by+50);
-        ctx.font = '16px "Segoe UI"';
-        ctx.fillStyle = '#ccc';
-        ctx.fillText(`لقد جمعت ${finalScore} نقطة`, canvas.width/2, by+85);
-        // زر مضاعفة
-        const btn1 = drawButton(canvas.width/2, by+130, 230, 46, '▶ مضاعفة النقاط (x3)', '#ffb300', '#ff8f00', ()=>{
-            finalScore *= 3;
-            walletPoints += finalScore;
-            walletSpan.textContent = walletPoints.toLocaleString();
-            resetGame();
-        });
-        overlayButtons.push(btn1);
-        const btn2 = drawButton(canvas.width/2, by+188, 150, 40, 'تخطي', '#555', '#444', ()=>{
-            walletPoints += finalScore;
-            walletSpan.textContent = walletPoints.toLocaleString();
-            resetGame();
-        });
-        overlayButtons.push(btn2);
-    }
-
-    function resetGame() {
-        gameOverActive = false;
-        gameRunning = true;
-        balls = [];
-        currentBall = null;
-        score = 0;
-        energy = maxEnergy;
-        liveEnergySpan.textContent = energy;
-        liveScoreSpan.textContent = '0';
-        updateDailyUI();
-        spawnBall();
-    }
-
-    // ---------- تحديث واجهة المستخدم ----------
-    function updateUI() {
-        liveScoreSpan.textContent = score;
-    }
-    function updateDailyUI() {
-        const pct = Math.min(100, Math.floor((dailyProgress/dailyGoal)*100));
-        dailyFill.style.width = pct+'%';
-        dailyText.textContent = dailyProgress+'/'+dailyGoal;
-    }
-
-    // ---------- الطاقة المتجددة ----------
-    setInterval(() => {
-        if(gameRunning && !gameOverActive && energy < maxEnergy) {
-            energy++;
-            liveEnergySpan.textContent = energy;
-            if(!currentBall && energy>0) spawnBall();
-        }
-    }, 15000); // تتجدد كل 15 ثانية
-
-    // ---------- حلقة اللعبة ----------
-    function gameLoop() {
-        if(!gameRunning && !gameOverActive) {
-            animationId = requestAnimationFrame(gameLoop);
-            return;
-        }
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        drawBackground();
-        // تحديث ورسم الكرات
-        for(let b of balls) {
-            b.vy += 0.7;
-            b.y += b.vy;
-            b.x += b.vx;
-            if(b.y+b.radius > canvas.height) {
-                b.y = canvas.height - b.radius;
-                b.vy *= -0.3;
-            }
-            if(b.x-b.radius < 0) { b.x = b.radius; b.vx *= -0.5; }
-            if(b.x+b.radius > canvas.width) { b.x = canvas.width-b.radius; b.vx *= -0.5; }
-            b.vy *= 0.995;
-            b.vx *= 0.99;
-            b.draw(ctx);
-        }
-        // جسيمات
-        for(let i=particles.length-1;i>=0;i--) {
-            particles[i].update();
-            particles[i].draw(ctx);
-            if(particles[i].life <= 0) particles.splice(i,1);
-        }
-        // الكرة الحالية
-        if(currentBall && !gameOverActive) {
-            currentBall.y = 25;
-            ctx.setLineDash([6,6]);
-            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-            ctx.beginPath();
-            ctx.moveTo(currentBall.x, currentBall.radius+5);
-            ctx.lineTo(currentBall.x, canvas.height - currentBall.radius);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            currentBall.draw(ctx);
-        }
-        // نافذة نهاية اللعبة
-        if(gameOverActive) {
-            drawOverlay();
-        }
-        animationId = requestAnimationFrame(gameLoop);
-    }
-
-    // ---------- أحداث التحكم ----------
-    canvas.addEventListener('mousemove', e => {
-        if(!currentBall || !gameRunning || gameOverActive) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width-currentBall.radius, x));
-    });
-    canvas.addEventListener('click', e => {
-        if(gameOverActive) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            for(let btn of overlayButtons) {
-                if(mx >= btn.x && mx <= btn.x+btn.w && my >= btn.y && my <= btn.y+btn.h) {
-                    btn.onClick();
-                    return;
-                }
-            }
-            return;
-        }
-        if(currentBall && gameRunning && energy>0) dropBall(currentBall.x);
-    });
-    canvas.addEventListener('touchmove', e => {
-        e.preventDefault();
-        if(!currentBall || !gameRunning || gameOverActive) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.touches[0].clientX - rect.left;
-        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width-currentBall.radius, x));
-    }, {passive:false});
-    canvas.addEventListener('touchend', e => {
-        e.preventDefault();
-        if(gameOverActive) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.changedTouches[0].clientX - rect.left;
-            const my = e.changedTouches[0].clientY - rect.top;
-            for(let btn of overlayButtons) {
-                if(mx >= btn.x && mx <= btn.x+btn.w && my >= btn.y && my <= btn.y+btn.h) {
-                    btn.onClick();
-                    return;
-                }
-            }
-            return;
-        }
-        if(currentBall && gameRunning && energy>0) dropBall(currentBall.x);
-    });
-
-    // ---------- أزرار الواجهة ----------
-    startBtn.addEventListener('click', ()=>{
-        homeScreen.style.display = 'none';
-        gameScreen.style.display = 'flex';
-        resizeCanvas();
-        balls = []; currentBall = null; score = 0; energy = maxEnergy;
-        gameOverActive = false;
-        gameRunning = true;
-        liveEnergySpan.textContent = energy;
-        liveScoreSpan.textContent = '0';
-        updateDailyUI();
-        spawnBall();
-        if(animationId) cancelAnimationFrame(animationId);
-        gameLoop();
-    });
-    exitBtn.addEventListener('click', ()=>{
-        if(gameOverActive) {
-            walletPoints += finalScore;
-            walletSpan.textContent = walletPoints.toLocaleString();
-        } else {
-            walletPoints += score;
-            walletSpan.textContent = walletPoints.toLocaleString();
-        }
-        gameRunning = false;
-        gameOverActive = false;
-        cancelAnimationFrame(animationId);
-        balls = []; currentBall = null;
-        gameScreen.style.display = 'none';
-        homeScreen.style.display = 'flex';
-    });
-
-    // دالة roundRect للكانفاس
-    if (!CanvasRenderingContext2D.prototype.roundRect) {
-        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
-            if (typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
-            this.beginPath();
-            this.moveTo(x + r.tl, y);
-            this.lineTo(x + w - r.tr, y);
-            this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
-            this.lineTo(x + w, y + h - r.br);
-            this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
-            this.lineTo(x + r.bl, y + h);
-            this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
-            this.lineTo(x, y + r.tl);
-            this.quadraticCurveTo(x, y, x + r.tl, y);
-            this.closePath();
-            return this;
-        };
-    }
+function withdraw(){
+  const amt=parseFloat(document.getElementById('amt').value);
+  const msg=document.getElementById('wMsg');
+  if(!amt||amt<5){ msg.className='msg show err'; msg.textContent='الحد الأدنى 5$'; return; }
+  if(user.points/1000<amt){ msg.className='msg show err'; msg.textContent='رصيد غير كافٍ'; return; }
+  user.points-=Math.floor(amt*1000); user.withdraws++; save();
+  renderWallet(); document.getElementById('amt').value='';
+  msg.className='msg show ok'; msg.textContent='تم إرسال طلب $'+amt.toFixed(2)+' (تجريبي)';
+  toast('طلب السحب قيد المراجعة');
+}
 </script>
 </body>
 </html>
