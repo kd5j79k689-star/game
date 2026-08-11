@@ -1,297 +1,385 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reward Game</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-    body { background: #0F0F1A; color: white; min-height: 100vh; }
-    .screen { display: none; padding: 20px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
-    .screen.active { display: block; }
-    
-    /* Splash */
-    #splash { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .logo { width: 100px; height: 100px; background: linear-gradient(135deg, #6C63FF, #00D4FF); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; }
-    .loader { width: 40px; height: 40px; border: 3px solid #6C63FF; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-top: 30px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Login */
-    input { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 16px; background: rgba(255,255,255,0.08); color: white; font-size: 16px; }
-    input::placeholder { color: #aaa; }
-    button { width: 100%; padding: 16px; border: none; border-radius: 16px; background: #6C63FF; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    button:active { opacity: 0.8; }
-
-    /* Home */
-    .balance-card { background: linear-gradient(135deg, #6C63FF, #00D4FF); border-radius: 24px; padding: 28px; text-align: center; margin-bottom: 30px; }
-    .balance-card h1 { font-size: 48px; margin: 10px 0; }
-    .action-btn { background: rgba(255,255,255,0.07); border-radius: 20px; padding: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
-    .action-btn .icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-    .action-btn .text h3 { font-size: 17px; }
-    .action-btn .text p { font-size: 13px; color: #aaa; margin-top: 3px; }
-
-    /* Game */
-    .game-info { display: flex; justify-content: space-around; margin-bottom: 20px; }
-    .chip { background: rgba(255,255,255,0.08); padding: 12px 24px; border-radius: 16px; text-align: center; }
-    .chip span { display: block; font-size: 12px; color: #aaa; }
-    .chip strong { font-size: 22px; }
-    .game-area { background: rgba(255,255,255,0.05); border-radius: 24px; height: 350px; position: relative; overflow: hidden; margin-bottom: 20px; }
-    .target { width: 60px; height: 60px; background: linear-gradient(135deg, #FF6B6B, #FFE66D); border-radius: 50%; position: absolute; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 0 15px rgba(255,0,0,0.5); user-select: none; }
-
-    /* Wallet */
-    .wallet-card { background: #1A1A2E; border: 1px solid rgba(108,99,255,0.3); border-radius: 24px; padding: 28px; text-align: center; margin-bottom: 25px; }
-    .stats { display: flex; gap: 12px; margin-bottom: 25px; }
-    .stat { flex: 1; background: rgba(255,255,255,0.07); border-radius: 20px; padding: 20px; text-align: center; }
-    .stat .num { font-size: 24px; font-weight: bold; margin: 8px 0; }
-
-    .back-btn { background: transparent; border: 1px solid #6C63FF; color: #6C63FF; margin-bottom: 15px; }
-    .msg { text-align: center; padding: 12px; border-radius: 12px; margin-top: 15px; display: none; }
-    .msg.success { background: rgba(0,200,0,0.2); color: #4ade80; display: block; }
-    .msg.error { background: rgba(200,0,0,0.2); color: #f87171; display: block; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>دمج الكرات - Ball Merge</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0F0F1A;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+        }
+        #game-wrapper {
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, #0F0F1A, #1A1A2E);
+        }
+        /* الشاشة الرئيسية */
+        #home-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        #home-screen h1 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #6C63FF, #00D2FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn {
+            background: linear-gradient(135deg, #6C63FF, #00D2FF);
+            border: none;
+            color: white;
+            padding: 16px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(108, 99, 255, 0.5);
+            transition: 0.2s;
+            touch-action: manipulation;
+        }
+        .btn:active { transform: scale(0.95); }
+        .points-badge {
+            background: rgba(255,215,0,0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: gold;
+            font-weight: bold;
+        }
+        /* شاشة اللعبة */
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        #game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+        }
+        #game-header .score {
+            background: linear-gradient(135deg, #6C63FF, #00D2FF);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        #game-header button {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        canvas {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            touch-action: none;
+        }
+        #game-footer {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-
-  <!-- SPLASH -->
-  <div id="splash" class="screen active">
-    <div class="logo">🎮</div>
-    <h1>Reward Game</h1>
-    <p style="color:#aaa; margin-top:8px">العب • شاهد • اربح</p>
-    <div class="loader"></div>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="login" class="screen">
-    <div style="text-align:center; margin-top:60px">
-      <div style="font-size:60px">👤</div>
-      <h1 style="margin:15px 0">مرحباً بك</h1>
-      <p style="color:#aaa">سجل دخولك للبدء</p>
-    </div>
-    <div style="margin-top:40px">
-      <input type="text" id="nameInput" placeholder="الاسم">
-      <input type="email" id="emailInput" placeholder="البريد الإلكتروني">
-      <button onclick="login()">تسجيل الدخول</button>
-    </div>
-  </div>
-
-  <!-- HOME -->
-  <div id="home" class="screen">
-    <div class="balance-card">
-      <p id="welcomeText">مرحباً</p>
-      <h1 id="pointsDisplay">0</h1>
-      <p>نقطة</p>
-      <p id="balanceDisplay" style="font-size:20px; margin-top:8px">≈ $0.00</p>
+<div id="game-wrapper">
+    <!-- الشاشة الرئيسية -->
+    <div id="home-screen">
+        <h1>🎮 دمج الكرات</h1>
+        <p style="color:#aaa;">أسقط الكرات وادمجها لتحقيق أعلى نتيجة</p>
+        <div class="points-badge">⭐ نقاطك: <span id="total-points">12,500</span></div>
+        <button class="btn" id="start-btn">▶ ابدأ اللعبة</button>
     </div>
 
-    <div class="action-btn" onclick="showScreen('game')">
-      <div class="icon" style="background:rgba(0,212,255,0.2)">🎯</div>
-      <div class="text"><h3>العب الآن</h3><p>اجمع نقاط من اللعب</p></div>
+    <!-- شاشة اللعبة -->
+    <div id="game-screen">
+        <div id="game-header">
+            <button id="exit-btn">✕ خروج</button>
+            <div class="score">⭐ <span id="current-score">0</span></div>
+            <div style="width:50px;"></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="game-footer">
+            <span>⚡ <span id="energy">3/5</span></span>
+            <button style="background: linear-gradient(135deg, #FFD700, #FFA000); border:none; padding:8px 15px; border-radius:15px; color:black; font-weight:bold;">▶ طاقة</button>
+        </div>
     </div>
-
-    <div class="action-btn" onclick="watchAd()">
-      <div class="icon" style="background:rgba(255,107,107,0.2)">▶️</div>
-      <div class="text"><h3>شاهد إعلان</h3><p>+20 نقطة</p></div>
-    </div>
-
-    <div class="action-btn" onclick="showReferral()">
-      <div class="icon" style="background:rgba(78,205,196,0.2)">👥</div>
-      <div class="text"><h3>دعوة أصدقاء</h3><p id="refCode">كودك: ---</p></div>
-    </div>
-
-    <div class="action-btn" onclick="showScreen('wallet')">
-      <div class="icon" style="background:rgba(108,99,255,0.2)">💰</div>
-      <div class="text"><h3>المحفظة</h3><p>السحب والطلبات</p></div>
-    </div>
-
-    <p style="text-align:center; color:#666; margin-top:30px" id="adsCount">إجمالي الإعلانات: 0</p>
-  </div>
-
-  <!-- GAME -->
-  <div id="game" class="screen">
-    <button class="back-btn" onclick="showScreen('home')">← رجوع</button>
-    <div class="game-info">
-      <div class="chip"><span>النقاط</span><strong id="gameScore">0</strong></div>
-      <div class="chip"><span>الوقت</span><strong id="gameTime">30</strong></div>
-    </div>
-    <div class="game-area" id="gameArea">
-      <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#666" id="gameHint">
-        اضغط "ابدأ" ثم اضغط على الهدف بأسرع ما يمكن
-      </div>
-    </div>
-    <button id="startBtn" onclick="startGame()">ابدأ اللعب</button>
-  </div>
-
-  <!-- WALLET -->
-  <div id="wallet" class="screen">
-    <button class="back-btn" onclick="showScreen('home')">← رجوع</button>
-    <div class="wallet-card">
-      <p style="color:#aaa">رصيدك الحالي</p>
-      <h1 id="walletPoints" style="font-size:36px; margin:10px 0">0 نقطة</h1>
-      <p id="walletBalance" style="font-size:22px; color:#00D4FF">≈ $0.00</p>
-    </div>
-    <div class="stats">
-      <div class="stat"><div>▶️</div><div class="num" id="statAds">0</div><div style="color:#aaa">إعلانات</div></div>
-      <div class="stat"><div>🏦</div><div class="num" id="statWithdraw">0</div><div style="color:#aaa">سحوبات</div></div>
-    </div>
-    <h3 style="margin-bottom:8px">طلب سحب</h3>
-    <p style="color:#aaa; font-size:13px; margin-bottom:15px">الحد الأدنى: 5 دولارات</p>
-    <input type="number" id="withdrawAmount" placeholder="المبلغ بالدولار">
-    <button onclick="requestWithdraw()">إرسال طلب السحب</button>
-    <div id="withdrawMsg" class="msg"></div>
-  </div>
+</div>
 
 <script>
-  // ===== البيانات =====
-  let user = JSON.parse(localStorage.getItem('rewardUser')) || null;
+    // ---------- عناصر HTML ----------
+    const homeScreen = document.getElementById('home-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const startBtn = document.getElementById('start-btn');
+    const exitBtn = document.getElementById('exit-btn');
+    const totalPointsSpan = document.getElementById('total-points');
+    const currentScoreSpan = document.getElementById('current-score');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-  function save() {
-    localStorage.setItem('rewardUser', JSON.stringify(user));
-  }
+    // ---------- متغيرات اللعبة ----------
+    let totalPoints = 12500;
+    let score = 0;
+    let gameRunning = false;
+    let balls = [];
+    let currentBall = null;
+    let animationId = null;
 
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    if (id === 'home') updateHome();
-    if (id === 'wallet') updateWallet();
-  }
+    // ألوان الكرات
+    const colors = ['#FF6B6B','#FF8E53','#FFD93D','#6BCB77','#4D96FF','#6C63FF','#9B59B6','#E91E63'];
 
-  // ===== Splash =====
-  setTimeout(() => {
-    if (user) showScreen('home');
-    else showScreen('login');
-  }, 2000);
-
-  // ===== Login =====
-  function login() {
-    const name = document.getElementById('nameInput').value.trim();
-    const email = document.getElementById('emailInput').value.trim();
-    if (!name || !email) return alert('أدخل الاسم والبريد');
-    
-    const code = name.substring(0,3).toUpperCase() + Math.random().toString(36).substring(2,6).toUpperCase();
-    user = {
-      name, email,
-      points: 50,
-      referralCode: code,
-      totalAds: 0,
-      totalWithdraw: 0
-    };
-    save();
-    showScreen('home');
-  }
-
-  // ===== Home =====
-  function updateHome() {
-    document.getElementById('welcomeText').textContent = 'مرحباً، ' + user.name;
-    document.getElementById('pointsDisplay').textContent = user.points;
-    document.getElementById('balanceDisplay').textContent = '≈ $' + (user.points / 1000).toFixed(2);
-    document.getElementById('refCode').textContent = 'كودك: ' + user.referralCode;
-    document.getElementById('adsCount').textContent = 'إجمالي الإعلانات: ' + user.totalAds;
-  }
-
-  function watchAd() {
-    if (!confirm('هل تريد مشاهدة إعلان لمدة 3 ثواني؟')) return;
-    const btn = event.currentTarget;
-    btn.style.opacity = '0.5';
-    setTimeout(() => {
-      user.points += 20;
-      user.totalAds += 1;
-      save();
-      updateHome();
-      btn.style.opacity = '1';
-      alert('🎉 حصلت على +20 نقطة!');
-    }, 3000);
-  }
-
-  function showReferral() {
-    alert('كود الإحالة الخاص بك:\n\n' + user.referralCode + '\n\nشاركه مع أصدقائك');
-  }
-
-  // ===== Game =====
-  let score = 0, timeLeft = 30, playing = false, timer = null;
-
-  function startGame() {
-    score = 0;
-    timeLeft = 30;
-    playing = true;
-    document.getElementById('gameScore').textContent = 0;
-    document.getElementById('gameTime').textContent = 30;
-    document.getElementById('startBtn').disabled = true;
-    document.getElementById('startBtn').textContent = 'اللعبة جارية...';
-    document.getElementById('gameHint').style.display = 'none';
-    
-    spawnTarget();
-    timer = setInterval(() => {
-      timeLeft--;
-      document.getElementById('gameTime').textContent = timeLeft;
-      if (timeLeft <= 0) endGame();
-    }, 1000);
-  }
-
-  function spawnTarget() {
-    const area = document.getElementById('gameArea');
-    // إزالة الهدف القديم
-    const old = area.querySelector('.target');
-    if (old) old.remove();
-
-    const target = document.createElement('div');
-    target.className = 'target';
-    target.textContent = '👆';
-    target.style.left = (10 + Math.random() * 70) + '%';
-    target.style.top = (10 + Math.random() * 70) + '%';
-    target.onclick = () => {
-      if (!playing) return;
-      score++;
-      document.getElementById('gameScore').textContent = score;
-      spawnTarget();
-    };
-    area.appendChild(target);
-  }
-
-  function endGame() {
-    playing = false;
-    clearInterval(timer);
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('startBtn').textContent = 'ابدأ اللعب';
-    
-    const points = score * 2;
-    user.points += points;
-    save();
-    
-    alert('انتهت اللعبة!\n\nحصلت على ' + score + ' نقطة\n+ ' + points + ' نقطة في محفظتك');
-    updateHome();
-  }
-
-  // ===== Wallet =====
-  function updateWallet() {
-    document.getElementById('walletPoints').textContent = user.points + ' نقطة';
-    document.getElementById('walletBalance').textContent = '≈ $' + (user.points / 1000).toFixed(2);
-    document.getElementById('statAds').textContent = user.totalAds;
-    document.getElementById('statWithdraw').textContent = user.totalWithdraw;
-  }
-
-  function requestWithdraw() {
-    const amount = parseFloat(document.getElementById('withdrawAmount').value);
-    const msg = document.getElementById('withdrawMsg');
-    
-    if (!amount || amount < 5) {
-      msg.className = 'msg error';
-      msg.textContent = 'الحد الأدنى للسحب هو 5 دولارات';
-      return;
+    // ---------- تحجيم الكانفاس ----------
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height - 80; // ناقص الهيدر والفوتر
     }
-    if ((user.points / 1000) < amount) {
-      msg.className = 'msg error';
-      msg.textContent = 'رصيدك غير كافٍ';
-      return;
+    window.addEventListener('resize', () => { if (gameRunning) resizeCanvas(); });
+
+    // ---------- كائن الكرة ----------
+    class Ball {
+        constructor(x, y, number) {
+            this.x = x;
+            this.y = y;
+            this.number = number; // القيمة الفعلية (2، 4، 8 ...)
+            this.value = Math.pow(2, number); // القيمة العددية
+            this.radius = 20 + number * 3;
+            this.color = colors[(number-1) % colors.length];
+            this.vy = 0;
+            this.vx = 0;
+            this.merged = false;
+        }
+        draw(ctx) {
+            // تدرج لوني
+            const grad = ctx.createRadialGradient(this.x-4, this.y-4, 2, this.x, this.y, this.radius);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(0.3, this.color);
+            grad.addColorStop(1, this.color + 'AA');
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            // الرقم
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${this.radius*0.7}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.value, this.x, this.y);
+        }
     }
-    
-    user.points -= Math.floor(amount * 1000);
-    user.totalWithdraw += 1;
-    save();
-    updateWallet();
-    document.getElementById('withdrawAmount').value = '';
-    msg.className = 'msg success';
-    msg.textContent = 'تم إرسال طلب سحب بقيمة $' + amount.toFixed(2) + ' بنجاح (تجريبي)';
-  }
+
+    // ---------- إنشاء كرة جديدة في الأعلى ----------
+    function spawnBall() {
+        if (!gameRunning) return;
+        const num = Math.random() < 0.7 ? 1 : (Math.random() < 0.7 ? 2 : 3);
+        currentBall = new Ball(canvas.width/2, 30, num);
+    }
+
+    // ---------- إسقاط الكرة ----------
+    function dropBall(x) {
+        if (!currentBall || !gameRunning) return;
+        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width - currentBall.radius, x));
+        currentBall.vy = 4;
+        balls.push(currentBall);
+        score += 5;
+        currentScoreSpan.textContent = score;
+        currentBall = null;
+        // ننتظر قليلاً ثم نفحص الدمج وننتج كرة جديدة
+        setTimeout(() => {
+            if (!gameRunning) return;
+            checkMerges();
+            checkGameOver();
+            if (!currentBall) spawnBall();
+        }, 500);
+    }
+
+    // ---------- فحص الدمج ----------
+    function checkMerges() {
+        let merged = false;
+        for (let i = 0; i < balls.length; i++) {
+            if (balls[i].merged) continue;
+            for (let j = i+1; j < balls.length; j++) {
+                if (balls[j].merged) continue;
+                if (balls[i].number === balls[j].number) {
+                    const dx = balls[i].x - balls[j].x;
+                    const dy = balls[i].y - balls[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < balls[i].radius + balls[j].radius - 8) {
+                        // دمج
+                        balls[i].merged = true;
+                        balls[j].merged = true;
+                        const newNum = balls[i].number + 1;
+                        const newX = (balls[i].x + balls[j].x) / 2;
+                        const newY = (balls[i].y + balls[j].y) / 2;
+                        balls.push(new Ball(newX, newY, newNum));
+                        score += Math.pow(2, newNum) * 10;
+                        currentScoreSpan.textContent = score;
+                        merged = true;
+                    }
+                }
+            }
+        }
+        // إزالة الكرات المدمجة
+        balls = balls.filter(b => !b.merged);
+        if (merged) {
+            // إعادة فحص بعد فترة قصيرة
+            setTimeout(() => {
+                if (gameRunning) checkMerges();
+            }, 300);
+        }
+    }
+
+    // ---------- فحص نهاية اللعبة ----------
+    function checkGameOver() {
+        // إذا تجاوزت الكرات ارتفاع معين
+        for (let b of balls) {
+            if (b.y - b.radius < 20) {
+                endGame();
+                return;
+            }
+        }
+    }
+
+    function endGame() {
+        gameRunning = false;
+        alert(`انتهت اللعبة! لقد جمعت ${score} نقطة.\nشاهد إعلاناً لمضاعفتها إلى ${score*3}!`);
+        score *= 3;
+        totalPoints += score;
+        totalPointsSpan.textContent = totalPoints.toLocaleString();
+        goHome();
+    }
+
+    // ---------- العودة للشاشة الرئيسية ----------
+    function goHome() {
+        gameRunning = false;
+        cancelAnimationFrame(animationId);
+        balls = [];
+        currentBall = null;
+        gameScreen.style.display = 'none';
+        homeScreen.style.display = 'flex';
+    }
+
+    // ---------- بدء اللعبة ----------
+    function startGame() {
+        homeScreen.style.display = 'none';
+        gameScreen.style.display = 'flex';
+        resizeCanvas();
+        balls = [];
+        currentBall = null;
+        score = 0;
+        currentScoreSpan.textContent = '0';
+        gameRunning = true;
+        spawnBall();
+        if (animationId) cancelAnimationFrame(animationId);
+        gameLoop();
+    }
+
+    // ---------- حلقة اللعبة ----------
+    function gameLoop() {
+        if (!gameRunning) {
+            animationId = requestAnimationFrame(gameLoop);
+            return;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // تحديث ورسم الكرات
+        for (let i = balls.length-1; i >= 0; i--) {
+            const b = balls[i];
+            b.vy += 0.6; // جاذبية
+            b.y += b.vy;
+            b.x += b.vx;
+
+            // حدود الأرضية والجدران
+            if (b.y + b.radius > canvas.height) {
+                b.y = canvas.height - b.radius;
+                b.vy *= -0.4;
+            }
+            if (b.x - b.radius < 0) {
+                b.x = b.radius;
+                b.vx *= -0.5;
+            }
+            if (b.x + b.radius > canvas.width) {
+                b.x = canvas.width - b.radius;
+                b.vx *= -0.5;
+            }
+
+            // احتكاك بسيط
+            b.vy *= 0.995;
+            b.vx *= 0.99;
+
+            b.draw(ctx);
+        }
+
+        // رسم الكرة الحالية مع خط توجيه
+        if (currentBall) {
+            // خط متقطع
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(currentBall.x, currentBall.radius);
+            ctx.lineTo(currentBall.x, canvas.height - currentBall.radius);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            currentBall.y = 30; // تبقى في الأعلى
+            currentBall.draw(ctx);
+        }
+
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    // ---------- أحداث التحكم ----------
+    canvas.addEventListener('mousemove', (e) => {
+        if (!currentBall || !gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width - currentBall.radius, x));
+    });
+    canvas.addEventListener('click', (e) => {
+        if (!gameRunning || !currentBall) return;
+        dropBall(currentBall.x);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!currentBall || !gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.touches[0].clientX - rect.left;
+        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width - currentBall.radius, x));
+    }, {passive: false});
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (!gameRunning || !currentBall) return;
+        dropBall(currentBall.x);
+    });
+
+    // أزرار التحكم
+    startBtn.addEventListener('click', startGame);
+    exitBtn.addEventListener('click', goHome);
 </script>
 </body>
 </html>
