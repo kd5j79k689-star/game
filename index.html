@@ -21,7 +21,6 @@
     .screen.active { display:block; }
     @keyframes fade { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 
-    /* ===== Common ===== */
     .btn {
       width:100%; padding:15px; border:none; border-radius:14px;
       background:linear-gradient(135deg, var(--primary), #9B7BFF);
@@ -29,7 +28,6 @@
     }
     .btn:active { transform:scale(.97); }
     .btn:disabled { opacity:.45; }
-    .btn-outline { background:transparent; border:1.5px solid var(--primary); color:var(--primary); }
     .back {
       background:transparent; border:1px solid var(--border); color:#999;
       padding:9px 16px; border-radius:11px; font-size:13px; margin-bottom:16px; cursor:pointer;
@@ -40,7 +38,6 @@
     }
     input:focus { border-color:var(--primary); }
 
-    /* ===== Splash ===== */
     #splash {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       text-align:center; background:radial-gradient(circle at 50% 40%, #151528 0%, #08080F 70%);
@@ -60,7 +57,6 @@
     }
     @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* ===== Home ===== */
     .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
     .level-pill {
       background:linear-gradient(135deg, #FBBF24, #F59E0B); color:#111;
@@ -69,7 +65,7 @@
     .balance {
       background:linear-gradient(135deg, #6D5CFF, #00D4FF);
       border-radius:24px; padding:26px 20px; text-align:center; margin-bottom:20px;
-      box-shadow:0 12px 32px rgba(109,92,255,.3); position:relative; overflow:hidden;
+      box-shadow:0 12px 32px rgba(109,92,255,.3);
     }
     .balance .pts { font-size:48px; font-weight:800; margin:6px 0; letter-spacing:-1px; }
     .daily {
@@ -80,7 +76,7 @@
     .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
     .game-card {
       background:var(--card); border:1px solid var(--border); border-radius:18px;
-      padding:18px 14px; text-align:center; cursor:pointer; transition:.15s;
+      padding:18px 14px; text-align:center; cursor:pointer;
     }
     .game-card:active { transform:scale(.96); background:rgba(255,255,255,.09); }
     .game-card .ico { font-size:32px; margin-bottom:8px; }
@@ -90,21 +86,16 @@
       background:var(--card); border:1px solid var(--border); border-radius:18px;
       padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; margin-bottom:10px;
     }
-    .full-card:active { background:rgba(255,255,255,.08); }
     .full-card .ico {
       width:46px; height:46px; border-radius:14px; display:flex;
       align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
     }
 
-    /* ===== Game Common ===== */
     .g-stats { display:flex; gap:8px; margin-bottom:14px; }
-    .g-stat {
-      flex:1; background:var(--card); border-radius:14px; padding:12px; text-align:center;
-    }
+    .g-stat { flex:1; background:var(--card); border-radius:14px; padding:12px; text-align:center; }
     .g-stat span { display:block; font-size:11px; color:#777; margin-bottom:3px; }
     .g-stat b { font-size:20px; }
 
-    /* Target Game */
     .board {
       background:linear-gradient(180deg,#111122,#0a0a14);
       border:1px solid var(--border); border-radius:20px; height:360px;
@@ -121,10 +112,7 @@
     }
     @keyframes up { to{opacity:0; transform:translateY(-45px)} }
 
-    /* Memory */
-    .memory-grid {
-      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;
-    }
+    .memory-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
     .card {
       aspect-ratio:1; background:var(--card); border:1px solid var(--border);
       border-radius:12px; display:flex; align-items:center; justify-content:center;
@@ -133,7 +121,6 @@
     .card.flipped, .card.matched { background:rgba(124,107,255,.2); border-color:var(--primary); }
     .card.matched { opacity:.6; }
 
-    /* Reaction */
     .react-area {
       height:320px; border-radius:20px; display:flex; align-items:center;
       justify-content:center; font-size:22px; font-weight:700; text-align:center;
@@ -143,7 +130,6 @@
     .react-go { background:linear-gradient(135deg,#22C55E,#16A34A); color:#fff; }
     .react-early { background:linear-gradient(135deg,#EF4444,#DC2626); color:#fff; }
 
-    /* Wallet */
     .w-card {
       background:linear-gradient(135deg,#151528,#0f0f1c);
       border:1px solid rgba(124,107,255,.25); border-radius:22px;
@@ -151,16 +137,13 @@
     }
     .w-card .big { font-size:36px; font-weight:800; margin:8px 0; }
     .mini { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
-    .mini div {
-      background:var(--card); border-radius:16px; padding:16px; text-align:center;
-    }
+    .mini div { background:var(--card); border-radius:16px; padding:16px; text-align:center; }
     .mini .n { font-size:24px; font-weight:700; margin:5px 0; }
     .msg { text-align:center; padding:12px; border-radius:12px; margin-top:12px; font-size:13px; display:none; }
     .msg.show { display:block; }
     .msg.ok { background:rgba(34,197,94,.15); color:#22C55E; }
     .msg.err { background:rgba(239,68,68,.15); color:#F87171; }
 
-    /* Toast */
     .toast {
       position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px);
       background:#16162a; border:1px solid var(--border); padding:12px 22px;
@@ -168,11 +151,19 @@
       box-shadow:0 8px 24px rgba(0,0,0,.4); white-space:nowrap;
     }
     .toast.show { transform:translateX(-50%) translateY(0); }
+
+    .sound-btn {
+      position:fixed; top:14px; left:14px; z-index:100;
+      width:40px; height:40px; border-radius:50%; border:1px solid var(--border);
+      background:rgba(0,0,0,.4); color:#fff; font-size:18px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+    }
   </style>
 </head>
 <body>
 
-<!-- SPLASH -->
+<button class="sound-btn" id="soundToggle" onclick="toggleSound()">🔊</button>
+
 <div id="splash" class="screen active">
   <div class="logo">🎮</div>
   <h1 style="font-size:26px;font-weight:800">Reward Game</h1>
@@ -180,7 +171,6 @@
   <div class="loader"></div>
 </div>
 
-<!-- LOGIN -->
 <div id="login" class="screen">
   <div style="text-align:center;margin:50px 0 36px">
     <div style="font-size:56px">👤</div>
@@ -192,7 +182,6 @@
   <button class="btn" onclick="login()">دخول / تسجيل</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="screen">
   <div class="top-bar">
     <h2 id="greet" style="font-size:18px">مرحباً</h2>
@@ -255,7 +244,6 @@
   </div>
 </div>
 
-<!-- TARGET GAME -->
 <div id="target" class="screen">
   <button class="back" onclick="backHome()">← رجوع</button>
   <div class="g-stats">
@@ -271,7 +259,6 @@
   <button class="btn" id="tBtn" onclick="startTarget()">ابدأ التحدي</button>
 </div>
 
-<!-- MEMORY GAME -->
 <div id="memory" class="screen">
   <button class="back" onclick="backHome()">← رجوع</button>
   <div class="g-stats">
@@ -283,7 +270,6 @@
   <button class="btn" id="mBtn" onclick="startMemory()">ابدأ الذاكرة</button>
 </div>
 
-<!-- REACTION GAME -->
 <div id="react" class="screen">
   <button class="back" onclick="backHome()">← رجوع</button>
   <div class="g-stats">
@@ -297,7 +283,6 @@
   <button class="btn" id="rBtn" onclick="startReact()">ابدأ الاختبار</button>
 </div>
 
-<!-- WALLET -->
 <div id="wallet" class="screen">
   <button class="back" onclick="showScreen('home')">← رجوع</button>
   <div class="w-card">
@@ -319,9 +304,58 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========== DATA ========== */
+/* ===================== SOUND SYSTEM ===================== */
+let audioCtx = null;
+let soundOn = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, type, duration, vol = 0.15, slide = 0) {
+  if (!soundOn) return;
+  initAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  if (slide) osc.frequency.linearRampToValueAtTime(freq + slide, audioCtx.currentTime + duration);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+// أصوات جاهزة
+const SFX = {
+  click:   () => playTone(600, 'sine', 0.06, 0.1),
+  hit:     () => { playTone(880, 'square', 0.08, 0.12); playTone(1200, 'sine', 0.1, 0.08); },
+  combo:   () => { playTone(600, 'sine', 0.07, 0.1); setTimeout(() => playTone(900, 'sine', 0.08, 0.1), 50); },
+  coin:    () => { playTone(987, 'sine', 0.1, 0.12); setTimeout(() => playTone(1318, 'sine', 0.15, 0.1), 80); },
+  success: () => { playTone(523, 'sine', 0.1, 0.1); setTimeout(() => playTone(659, 'sine', 0.1, 0.1), 100); setTimeout(() => playTone(784, 'sine', 0.2, 0.12), 200); },
+  flip:    () => playTone(400, 'triangle', 0.07, 0.08),
+  match:   () => { playTone(700, 'sine', 0.1, 0.1); setTimeout(() => playTone(1050, 'sine', 0.15, 0.1), 90); },
+  fail:    () => playTone(180, 'sawtooth', 0.25, 0.1, -80),
+  start:   () => { playTone(440, 'sine', 0.1, 0.1); setTimeout(() => playTone(554, 'sine', 0.15, 0.1), 120); },
+  go:      () => playTone(880, 'square', 0.15, 0.15),
+  level:   () => { playTone(523, 'sine', 0.08, 0.1); setTimeout(() => playTone(784, 'sine', 0.12, 0.12), 100); },
+  daily:   () => { playTone(659, 'sine', 0.1, 0.1); setTimeout(() => playTone(880, 'sine', 0.1, 0.1), 100); setTimeout(() => playTone(1174, 'sine', 0.2, 0.12), 200); }
+};
+
+function toggleSound() {
+  soundOn = !soundOn;
+  document.getElementById('soundToggle').textContent = soundOn ? '🔊' : '🔇';
+  if (soundOn) SFX.click();
+}
+
+/* ===================== DATA ===================== */
 let user = null;
-const KEY = 'rgp_v3';
+const KEY = 'rgp_v4';
 
 function load(){ const r=localStorage.getItem(KEY); if(r) user=JSON.parse(r); }
 function save(){ localStorage.setItem(KEY, JSON.stringify(user)); }
@@ -332,6 +366,7 @@ function showScreen(id){
   document.getElementById(id).classList.add('active');
   if(id==='home') renderHome();
   if(id==='wallet') renderWallet();
+  SFX.click();
 }
 
 function toast(m){
@@ -343,7 +378,7 @@ function toast(m){
 load();
 setTimeout(()=> user ? showScreen('home') : showScreen('login'), 1600);
 
-/* ========== LOGIN ========== */
+/* ===================== LOGIN ===================== */
 function login(){
   const n=document.getElementById('nameIn').value.trim();
   const e=document.getElementById('emailIn').value.trim();
@@ -354,10 +389,10 @@ function login(){
     ref:(n.slice(0,3)+Math.random().toString(36).slice(2,6)).toUpperCase(),
     lastDaily:null, bestReact:null
   };
-  save(); toast('تم إنشاء الحساب 🎉'); showScreen('home');
+  save(); SFX.success(); toast('تم إنشاء الحساب 🎉'); showScreen('home');
 }
 
-/* ========== HOME ========== */
+/* ===================== HOME ===================== */
 function renderHome(){
   document.getElementById('greet').textContent='مرحباً، '+user.name.split(' ')[0];
   document.getElementById('lvl').textContent='المستوى '+lvl();
@@ -374,26 +409,28 @@ function claimDaily(){
   const today=new Date().toDateString();
   if(user.lastDaily===today) return toast('طالبت اليوم بالفعل');
   user.points+=60; user.lastDaily=today; save();
-  renderHome(); toast('+60 نقطة مكافأة يومية 🎁');
+  SFX.daily(); renderHome(); toast('+60 نقطة مكافأة يومية 🎁');
 }
 
 function watchAd(){
+  SFX.click();
   toast('جاري الإعلان...');
   setTimeout(()=>{
     const r=25+Math.floor(Math.random()*21);
     user.points+=r; user.ads++; save();
-    renderHome(); toast('🎉 +'+r+' نقطة');
+    SFX.coin(); renderHome(); toast('🎉 +'+r+' نقطة');
   },2600);
 }
 
 function showRef(){
+  SFX.click();
   if(navigator.share) navigator.share({title:'Reward Game',text:'كود الإحالة: '+user.ref});
   else { navigator.clipboard?.writeText(user.ref); toast('تم نسخ الكود: '+user.ref); }
 }
 
 function backHome(){ showScreen('home'); }
 
-/* ========== TARGET FRENZY ========== */
+/* ===================== TARGET FRENZY ===================== */
 let tScore=0,tTime=30,tLevel=1,tPlay=false,tTimer=null,tCombo=0,tLast=0;
 
 function openTarget(){
@@ -414,11 +451,12 @@ function startTarget(){
   document.getElementById('tHint').style.display='none';
   document.getElementById('tBtn').disabled=true;
   document.getElementById('tBtn').textContent='جاري اللعب...';
+  SFX.start();
   spawnT();
   tTimer=setInterval(()=>{
     tTime--;
     document.getElementById('tTime').textContent=tTime;
-    if(tTime===20||tTime===10){ tLevel++; document.getElementById('tLvl').textContent=tLevel; toast('المستوى '+tLevel); }
+    if(tTime===20||tTime===10){ tLevel++; document.getElementById('tLvl').textContent=tLevel; SFX.level(); toast('المستوى '+tLevel); }
     if(tTime<=0) endTarget();
   },1000);
 }
@@ -443,6 +481,7 @@ function spawnT(){
     const gain=tLevel*mult;
     tScore+=gain;
     document.getElementById('tScore').textContent=tScore;
+    if(tCombo>=2) SFX.combo(); else SFX.hit();
     const p=document.createElement('div');
     p.className='popup'; p.textContent='+'+gain;
     p.style.left=(e.clientX-board.getBoundingClientRect().left)+'px';
@@ -460,10 +499,11 @@ function endTarget(){
   document.getElementById('tBtn').textContent='العب مرة أخرى';
   const earn=tScore*2;
   user.points+=earn; save();
+  SFX.success();
   setTimeout(()=>toast('انتهت! +'+earn+' نقطة'),200);
 }
 
-/* ========== MEMORY ========== */
+/* ===================== MEMORY ===================== */
 const EMOJIS=['🍎','🍌','🍇','🍊','🍓','🍉','🍒','🥝'];
 let mCards=[], mFlipped=[], mLock=false, mScore=0, mMoves=0, mTime=60, mTimer=null, mPlay=false;
 
@@ -483,6 +523,7 @@ function startMemory(){
   mPlay=true; mScore=0; mMoves=0; mTime=60; mFlipped=[]; mLock=false;
   document.getElementById('mBtn').disabled=true;
   document.getElementById('mBtn').textContent='جاري اللعب...';
+  SFX.start();
   const pairs=[...EMOJIS,...EMOJIS].sort(()=>Math.random()-.5);
   const grid=document.getElementById('mGrid');
   grid.innerHTML='';
@@ -500,6 +541,7 @@ function startMemory(){
 
 function flip(card){
   if(!mPlay||mLock||card.classList.contains('flipped')||card.classList.contains('matched')) return;
+  SFX.flip();
   card.classList.add('flipped');
   card.textContent=card.dataset.val;
   mFlipped.push(card);
@@ -510,6 +552,7 @@ function flip(card){
     if(a.dataset.val===b.dataset.val){
       a.classList.add('matched'); b.classList.add('matched');
       mScore+=15; document.getElementById('mScore').textContent=mScore;
+      SFX.match();
       mFlipped=[]; mLock=false;
       if(document.querySelectorAll('.matched').length===16) endMemory(true);
     } else {
@@ -529,10 +572,11 @@ function endMemory(won){
   let earn=mScore*2;
   if(won) earn+=40;
   user.points+=earn; save();
+  SFX.success();
   toast(won ? 'ممتاز! أكملت اللوحة +'+earn : 'انتهى الوقت +'+earn+' نقطة');
 }
 
-/* ========== REACTION ========== */
+/* ===================== REACTION ===================== */
 let rState='idle', rStart=0, rTries=0, rScores=[], rTimeout=null;
 
 function openReact(){
@@ -551,6 +595,7 @@ function startReact(){
   if(rState!=='idle'&&rState!=='done') return;
   rTries=0; rScores=[];
   document.getElementById('rBtn').disabled=true;
+  SFX.start();
   nextReact();
 }
 
@@ -566,6 +611,7 @@ function nextReact(){
     area.className='react-area react-go';
     area.textContent='اضغط الآن!';
     rStart=performance.now();
+    SFX.go();
   },delay);
 }
 
@@ -576,6 +622,7 @@ function reactClick(){
     rState='early';
     area.className='react-area react-early';
     area.textContent='بدري جداً! انتظر الأخضر';
+    SFX.fail();
     setTimeout(()=>nextReact(),1200);
     return;
   }
@@ -584,6 +631,7 @@ function reactClick(){
     rScores.push(ms);
     rTries++;
     document.getElementById('rTry').textContent=rTries+'/5';
+    SFX.hit();
     area.className='react-area react-wait';
     area.textContent=ms+'ms';
     if(rTries>=5) setTimeout(endReact,800);
@@ -607,10 +655,11 @@ function endReact(){
   document.getElementById('rBest').textContent=user.bestReact+'ms';
   document.getElementById('rScore').textContent=pts;
   document.getElementById('rArea').textContent='المعدل: '+avg+'ms\n+'+pts+' نقطة';
+  SFX.success();
   toast('معدلك '+avg+'ms • +'+pts+' نقطة');
 }
 
-/* ========== WALLET ========== */
+/* ===================== WALLET ===================== */
 function renderWallet(){
   document.getElementById('wPts').textContent=user.points.toLocaleString()+' نقطة';
   document.getElementById('wUsd').textContent='≈ $'+(user.points/1000).toFixed(2);
@@ -622,12 +671,12 @@ function renderWallet(){
 function withdraw(){
   const amt=parseFloat(document.getElementById('amt').value);
   const msg=document.getElementById('wMsg');
-  if(!amt||amt<5){ msg.className='msg show err'; msg.textContent='الحد الأدنى 5$'; return; }
-  if(user.points/1000<amt){ msg.className='msg show err'; msg.textContent='رصيد غير كافٍ'; return; }
+  if(!amt||amt<5){ msg.className='msg show err'; msg.textContent='الحد الأدنى 5$'; SFX.fail(); return; }
+  if(user.points/1000<amt){ msg.className='msg show err'; msg.textContent='رصيد غير كافٍ'; SFX.fail(); return; }
   user.points-=Math.floor(amt*1000); user.withdraws++; save();
   renderWallet(); document.getElementById('amt').value='';
   msg.className='msg show ok'; msg.textContent='تم إرسال طلب $'+amt.toFixed(2)+' (تجريبي)';
-  toast('طلب السحب قيد المراجعة');
+  SFX.coin(); toast('طلب السحب قيد المراجعة');
 }
 </script>
 </body>
