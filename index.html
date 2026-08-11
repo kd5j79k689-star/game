@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دمج الكرات - Ball Merge</title>
+    <title>دمج الكرات - Ball Merge Pro</title>
     <style>
+        :root {
+            --bg: #0a0a14;
+            --surface: #13132b;
+            --primary: #7c4dff;
+            --secondary: #00e5ff;
+            --gold: #ffd740;
+            --danger: #ff5252;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            margin: 0;
-            padding: 0;
-            background: #0F0F1A;
+            background: var(--bg);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
             touch-action: manipulation;
         }
         #game-wrapper {
@@ -21,9 +29,11 @@
             max-width: 500px;
             height: 100vh;
             position: relative;
-            background: linear-gradient(180deg, #0F0F1A, #1A1A2E);
+            background: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a14 70%);
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(124,77,255,0.15);
         }
-        /* الشاشة الرئيسية */
+        /* شاشة البداية */
         #home-screen {
             display: flex;
             flex-direction: column;
@@ -33,75 +43,121 @@
             padding: 20px;
             text-align: center;
             color: white;
+            z-index: 10;
+            position: relative;
         }
         #home-screen h1 {
-            font-size: 36px;
-            background: linear-gradient(135deg, #6C63FF, #00D2FF);
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #7c4dff, #00e5ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        #home-screen .subtitle {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .points-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 16px 28px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 18px;
         }
         .btn {
-            background: linear-gradient(135deg, #6C63FF, #00D2FF);
+            background: linear-gradient(135deg, #7c4dff, #00e5ff);
             border: none;
             color: white;
-            padding: 16px 40px;
+            padding: 18px 44px;
             font-size: 20px;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(108, 99, 255, 0.5);
-            transition: 0.2s;
+            box-shadow: 0 10px 25px rgba(124,77,255,0.4);
+            transition: all 0.2s;
             touch-action: manipulation;
+            letter-spacing: 1px;
         }
-        .btn:active { transform: scale(0.95); }
-        .points-badge {
-            background: rgba(255,215,0,0.2);
-            padding: 6px 16px;
+        .btn:active { transform: scale(0.96); }
+        .btn-sm {
+            padding: 10px 18px;
+            font-size: 14px;
             border-radius: 20px;
-            color: gold;
-            font-weight: bold;
         }
         /* شاشة اللعبة */
         #game-screen {
             display: none;
             flex-direction: column;
             height: 100%;
+            position: relative;
+            z-index: 5;
         }
         #game-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
-            background: rgba(0,0,0,0.3);
+            padding: 12px 16px;
+            background: rgba(10,10,25,0.7);
+            backdrop-filter: blur(10px);
             color: white;
+            z-index: 10;
         }
-        #game-header .score {
-            background: linear-gradient(135deg, #6C63FF, #00D2FF);
-            padding: 8px 20px;
-            border-radius: 20px;
+        .score-badge {
+            background: linear-gradient(135deg, #7c4dff, #00e5ff);
+            padding: 8px 22px;
+            border-radius: 30px;
             font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        #game-header button {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 15px;
-            cursor: pointer;
+        .energy-badge {
+            background: rgba(255,183,77,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: #ffb74d;
+            font-weight: bold;
+            font-size: 14px;
         }
         canvas {
             flex: 1;
-            background: rgba(0,0,0,0.4);
+            display: block;
             touch-action: none;
         }
         #game-footer {
-            padding: 10px 15px;
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0,0,0,0.3);
-            color: white;
+            background: rgba(10,10,25,0.7);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        .daily-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin: 0 12px;
+            overflow: hidden;
+        }
+        .daily-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        /* نافذة نهاية اللعبة داخل الكانفاس - سنرسمها عبر الكود */
+        .hidden { display: none !important; }
+        .text-glow {
+            text-shadow: 0 0 20px rgba(124,77,255,0.8);
         }
     </style>
 </head>
@@ -109,155 +165,217 @@
 <div id="game-wrapper">
     <!-- الشاشة الرئيسية -->
     <div id="home-screen">
-        <h1>🎮 دمج الكرات</h1>
-        <p style="color:#aaa;">أسقط الكرات وادمجها لتحقيق أعلى نتيجة</p>
-        <div class="points-badge">⭐ نقاطك: <span id="total-points">12,500</span></div>
+        <h1 class="text-glow">⚡ دمج الكرات</h1>
+        <p class="subtitle">أسقط الكرات وادمجها لتحقيق أعلى نتيجة</p>
+        <div class="points-card">💰 رصيدك: <span id="wallet-points">12,500</span> نقطة</div>
         <button class="btn" id="start-btn">▶ ابدأ اللعبة</button>
     </div>
 
     <!-- شاشة اللعبة -->
     <div id="game-screen">
         <div id="game-header">
-            <button id="exit-btn">✕ خروج</button>
-            <div class="score">⭐ <span id="current-score">0</span></div>
-            <div style="width:50px;"></div>
+            <button class="btn btn-sm" id="exit-btn" style="background:rgba(255,255,255,0.15);">✕</button>
+            <div class="score-badge">⭐ <span id="live-score">0</span></div>
+            <div class="energy-badge">⚡ <span id="live-energy">5</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
         <div id="game-footer">
-            <span>⚡ <span id="energy">3/5</span></span>
-            <button style="background: linear-gradient(135deg, #FFD700, #FFA000); border:none; padding:8px 15px; border-radius:15px; color:black; font-weight:bold;">▶ طاقة</button>
+            <span style="color:#aaa;font-size:13px;">الهدف اليومي</span>
+            <div class="daily-bar"><div class="daily-fill" id="daily-fill" style="width:30%"></div></div>
+            <span style="color:var(--gold);font-size:13px;" id="daily-text">300/1000</span>
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- عناصر HTML ----------
+    // ---------- DOM ----------
     const homeScreen = document.getElementById('home-screen');
     const gameScreen = document.getElementById('game-screen');
     const startBtn = document.getElementById('start-btn');
     const exitBtn = document.getElementById('exit-btn');
-    const totalPointsSpan = document.getElementById('total-points');
-    const currentScoreSpan = document.getElementById('current-score');
+    const walletSpan = document.getElementById('wallet-points');
+    const liveScoreSpan = document.getElementById('live-score');
+    const liveEnergySpan = document.getElementById('live-energy');
+    const dailyFill = document.getElementById('daily-fill');
+    const dailyText = document.getElementById('daily-text');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ---------- متغيرات اللعبة ----------
-    let totalPoints = 12500;
+    // ---------- حالة اللعبة ----------
+    let walletPoints = 12500;
     let score = 0;
+    let energy = 5;
+    let maxEnergy = 5;
+    let dailyGoal = 1000;
+    let dailyProgress = 300;
     let gameRunning = false;
     let balls = [];
     let currentBall = null;
-    let animationId = null;
+    let animationId;
+    let gameOverActive = false;
+    let finalScore = 0;
 
-    // ألوان الكرات
-    const colors = ['#FF6B6B','#FF8E53','#FFD93D','#6BCB77','#4D96FF','#6C63FF','#9B59B6','#E91E63'];
+    // الجسيمات (تأثيرات الدمج)
+    let particles = [];
 
+    // ألوان الكرات حسب الرقم (1~8+)
+    const colors = ['#FF6B6B','#FF8E53','#FFD93D','#6BCB77','#4D96FF','#7C4DFF','#E040FB','#FF4081'];
+    
     // ---------- تحجيم الكانفاس ----------
     function resizeCanvas() {
         const rect = canvas.parentElement.getBoundingClientRect();
         canvas.width = rect.width;
-        canvas.height = rect.height - 80; // ناقص الهيدر والفوتر
+        canvas.height = rect.height - 90;
     }
-    window.addEventListener('resize', () => { if (gameRunning) resizeCanvas(); });
+    window.addEventListener('resize', () => { if(gameRunning) resizeCanvas(); });
 
-    // ---------- كائن الكرة ----------
+    // ---------- كائن Ball ----------
     class Ball {
-        constructor(x, y, number) {
+        constructor(x,y,number) {
             this.x = x;
             this.y = y;
-            this.number = number; // القيمة الفعلية (2، 4، 8 ...)
-            this.value = Math.pow(2, number); // القيمة العددية
-            this.radius = 20 + number * 3;
+            this.number = number; // 1,2,3...
+            this.value = Math.pow(2, number);
+            this.radius = 22 + number * 3;
             this.color = colors[(number-1) % colors.length];
             this.vy = 0;
             this.vx = 0;
             this.merged = false;
         }
         draw(ctx) {
-            // تدرج لوني
-            const grad = ctx.createRadialGradient(this.x-4, this.y-4, 2, this.x, this.y, this.radius);
-            grad.addColorStop(0, '#fff');
-            grad.addColorStop(0.3, this.color);
-            grad.addColorStop(1, this.color + 'AA');
+            ctx.save();
+            // ظل خارجي
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 15;
+            const grad = ctx.createRadialGradient(this.x-3, this.y-3, 2, this.x, this.y, this.radius);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.4, this.color);
+            grad.addColorStop(1, this.color+'88');
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
             ctx.fillStyle = grad;
             ctx.fill();
-            // الرقم
+            ctx.shadowBlur = 0;
+            // نص الرقم
             ctx.fillStyle = 'white';
-            ctx.font = `bold ${this.radius*0.7}px Arial`;
+            ctx.font = `bold ${this.radius*0.65}px 'Segoe UI'`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(this.value, this.x, this.y);
+            ctx.restore();
         }
     }
 
-    // ---------- إنشاء كرة جديدة في الأعلى ----------
+    // ---------- جسيمات ----------
+    class Particle {
+        constructor(x,y,color) {
+            this.x = x; this.y = y;
+            this.vx = (Math.random()-0.5)*4;
+            this.vy = (Math.random()-0.5)*4 - 2;
+            this.life = 1;
+            this.color = color;
+            this.size = Math.random()*4+2;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.1;
+            this.life -= 0.02;
+        }
+        draw(ctx) {
+            ctx.globalAlpha = this.life;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // ---------- خلفية متحركة ----------
+    function drawBackground() {
+        // شبكة باهتة
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        const step = 40;
+        for(let x=0; x<canvas.width; x+=step) {
+            ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+        }
+        for(let y=0; y<canvas.height; y+=step) {
+            ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+        }
+    }
+
+    // ---------- إنشاء كرة جديدة ----------
     function spawnBall() {
-        if (!gameRunning) return;
-        const num = Math.random() < 0.7 ? 1 : (Math.random() < 0.7 ? 2 : 3);
-        currentBall = new Ball(canvas.width/2, 30, num);
+        if(!gameRunning || gameOverActive) return;
+        if(energy <= 0) {
+            // لا يمكن إسقاط كرة جديدة بدون طاقة
+            currentBall = null;
+            return;
+        }
+        const num = Math.random()<0.7?1:(Math.random()<0.7?2:3);
+        currentBall = new Ball(canvas.width/2, 20, num);
     }
 
     // ---------- إسقاط الكرة ----------
     function dropBall(x) {
-        if (!currentBall || !gameRunning) return;
-        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width - currentBall.radius, x));
-        currentBall.vy = 4;
+        if(!currentBall || !gameRunning || gameOverActive || energy<=0) return;
+        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width-currentBall.radius, x));
+        currentBall.vy = 5;
         balls.push(currentBall);
+        // استهلاك طاقة
+        energy--;
+        liveEnergySpan.textContent = energy;
+        // نقاط الإسقاط
         score += 5;
-        currentScoreSpan.textContent = score;
+        updateUI();
         currentBall = null;
-        // ننتظر قليلاً ثم نفحص الدمج وننتج كرة جديدة
-        setTimeout(() => {
-            if (!gameRunning) return;
+        setTimeout(()=>{
+            if(!gameRunning || gameOverActive) return;
             checkMerges();
             checkGameOver();
-            if (!currentBall) spawnBall();
-        }, 500);
+            if(!currentBall && energy>0) spawnBall();
+        }, 600);
     }
 
     // ---------- فحص الدمج ----------
     function checkMerges() {
         let merged = false;
-        for (let i = 0; i < balls.length; i++) {
-            if (balls[i].merged) continue;
-            for (let j = i+1; j < balls.length; j++) {
-                if (balls[j].merged) continue;
-                if (balls[i].number === balls[j].number) {
+        for(let i=0;i<balls.length;i++) {
+            if(balls[i].merged) continue;
+            for(let j=i+1;j<balls.length;j++) {
+                if(balls[j].merged) continue;
+                if(balls[i].number === balls[j].number) {
                     const dx = balls[i].x - balls[j].x;
                     const dy = balls[i].y - balls[j].y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < balls[i].radius + balls[j].radius - 8) {
-                        // دمج
+                    const dist = Math.sqrt(dx*dx+dy*dy);
+                    if(dist < balls[i].radius + balls[j].radius - 8) {
                         balls[i].merged = true;
                         balls[j].merged = true;
                         const newNum = balls[i].number + 1;
-                        const newX = (balls[i].x + balls[j].x) / 2;
-                        const newY = (balls[i].y + balls[j].y) / 2;
-                        balls.push(new Ball(newX, newY, newNum));
+                        const mx = (balls[i].x+balls[j].x)/2;
+                        const my = (balls[i].y+balls[j].y)/2;
+                        balls.push(new Ball(mx, my, newNum));
                         score += Math.pow(2, newNum) * 10;
-                        currentScoreSpan.textContent = score;
+                        updateUI();
+                        // إضافة جسيمات الدمج
+                        for(let p=0;p<15;p++) {
+                            particles.push(new Particle(mx, my, colors[(newNum-1)%colors.length]));
+                        }
                         merged = true;
                     }
                 }
             }
         }
-        // إزالة الكرات المدمجة
-        balls = balls.filter(b => !b.merged);
-        if (merged) {
-            // إعادة فحص بعد فترة قصيرة
-            setTimeout(() => {
-                if (gameRunning) checkMerges();
-            }, 300);
-        }
+        balls = balls.filter(b=>!b.merged);
+        if(merged) setTimeout(()=>{ if(gameRunning) checkMerges(); }, 250);
     }
 
-    // ---------- فحص نهاية اللعبة ----------
+    // ---------- نهاية اللعبة ----------
     function checkGameOver() {
-        // إذا تجاوزت الكرات ارتفاع معين
-        for (let b of balls) {
-            if (b.y - b.radius < 20) {
+        for(let b of balls) {
+            if(b.y - b.radius < 25) {
                 endGame();
                 return;
             }
@@ -265,121 +383,269 @@
     }
 
     function endGame() {
+        if(gameOverActive) return;
+        gameOverActive = true;
         gameRunning = false;
-        alert(`انتهت اللعبة! لقد جمعت ${score} نقطة.\nشاهد إعلاناً لمضاعفتها إلى ${score*3}!`);
-        score *= 3;
-        totalPoints += score;
-        totalPointsSpan.textContent = totalPoints.toLocaleString();
-        goHome();
+        finalScore = score;
+        // تحديث الهدف اليومي
+        dailyProgress = Math.min(dailyGoal, dailyProgress + score);
+        updateDailyUI();
     }
 
-    // ---------- العودة للشاشة الرئيسية ----------
-    function goHome() {
-        gameRunning = false;
-        cancelAnimationFrame(animationId);
-        balls = [];
-        currentBall = null;
-        gameScreen.style.display = 'none';
-        homeScreen.style.display = 'flex';
+    // ---------- رسم نافذة نهاية اللعبة ----------
+    function drawGameOverOverlay() {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        // صندوق
+        const boxW = 300, boxH = 260;
+        const bx = canvas.width/2 - boxW/2, by = canvas.height/2 - boxH/2;
+        ctx.fillStyle = '#1e1e3a';
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 24); ctx.fill(); ctx.stroke();
+        // نص
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 24px "Segoe UI"';
+        ctx.textAlign = 'center';
+        ctx.fillText('انتهت اللعبة!', canvas.width/2, by+45);
+        ctx.fillStyle = '#aaa';
+        ctx.font = '18px "Segoe UI"';
+        ctx.fillText(`لقد جمعت ${finalScore} نقطة`, canvas.width/2, by+85);
+        // زر مضاعفة
+        drawButton(canvas.width/2, by+130, 220, 44, '▶ شاهد إعلان لمضاعفتها', '#ffd740', '#ffa000', ()=>{
+            finalScore *= 3;
+            walletPoints += finalScore;
+            walletSpan.textContent = walletPoints.toLocaleString();
+            resetGame();
+        });
+        // زر تخطي
+        drawButton(canvas.width/2, by+185, 180, 40, 'تخطي', '#444', '#333', ()=>{
+            walletPoints += finalScore;
+            walletSpan.textContent = walletPoints.toLocaleString();
+            resetGame();
+        });
     }
 
-    // ---------- بدء اللعبة ----------
-    function startGame() {
-        homeScreen.style.display = 'none';
-        gameScreen.style.display = 'flex';
-        resizeCanvas();
+    function drawButton(x,y,w,h,text,color1,color2,onClick) {
+        const bx = x - w/2;
+        ctx.fillStyle = color1;
+        ctx.beginPath(); ctx.roundRect(bx, y-h/2, w, h, 30); ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 14px "Segoe UI"';
+        ctx.fillText(text, x, y+5);
+        // تخزين منطقة الزر للكشف
+        return {x:bx, y:y-h/2, w, h, onClick};
+    }
+
+    // مصفوفة أزرار مؤقتة
+    let overlayButtons = [];
+    function drawOverlay() {
+        overlayButtons = [];
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        const boxW = 320, boxH = 260;
+        const bx = canvas.width/2 - boxW/2, by = canvas.height/2 - boxH/2;
+        ctx.fillStyle = '#1e1e3a';
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 24); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 26px "Segoe UI"';
+        ctx.fillText('انتهت اللعبة!', canvas.width/2, by+50);
+        ctx.font = '16px "Segoe UI"';
+        ctx.fillStyle = '#ccc';
+        ctx.fillText(`لقد جمعت ${finalScore} نقطة`, canvas.width/2, by+85);
+        // زر مضاعفة
+        const btn1 = drawButton(canvas.width/2, by+130, 230, 46, '▶ مضاعفة النقاط (x3)', '#ffb300', '#ff8f00', ()=>{
+            finalScore *= 3;
+            walletPoints += finalScore;
+            walletSpan.textContent = walletPoints.toLocaleString();
+            resetGame();
+        });
+        overlayButtons.push(btn1);
+        const btn2 = drawButton(canvas.width/2, by+188, 150, 40, 'تخطي', '#555', '#444', ()=>{
+            walletPoints += finalScore;
+            walletSpan.textContent = walletPoints.toLocaleString();
+            resetGame();
+        });
+        overlayButtons.push(btn2);
+    }
+
+    function resetGame() {
+        gameOverActive = false;
+        gameRunning = true;
         balls = [];
         currentBall = null;
         score = 0;
-        currentScoreSpan.textContent = '0';
-        gameRunning = true;
+        energy = maxEnergy;
+        liveEnergySpan.textContent = energy;
+        liveScoreSpan.textContent = '0';
+        updateDailyUI();
         spawnBall();
-        if (animationId) cancelAnimationFrame(animationId);
-        gameLoop();
     }
+
+    // ---------- تحديث واجهة المستخدم ----------
+    function updateUI() {
+        liveScoreSpan.textContent = score;
+    }
+    function updateDailyUI() {
+        const pct = Math.min(100, Math.floor((dailyProgress/dailyGoal)*100));
+        dailyFill.style.width = pct+'%';
+        dailyText.textContent = dailyProgress+'/'+dailyGoal;
+    }
+
+    // ---------- الطاقة المتجددة ----------
+    setInterval(() => {
+        if(gameRunning && !gameOverActive && energy < maxEnergy) {
+            energy++;
+            liveEnergySpan.textContent = energy;
+            if(!currentBall && energy>0) spawnBall();
+        }
+    }, 15000); // تتجدد كل 15 ثانية
 
     // ---------- حلقة اللعبة ----------
     function gameLoop() {
-        if (!gameRunning) {
+        if(!gameRunning && !gameOverActive) {
             animationId = requestAnimationFrame(gameLoop);
             return;
         }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        drawBackground();
         // تحديث ورسم الكرات
-        for (let i = balls.length-1; i >= 0; i--) {
-            const b = balls[i];
-            b.vy += 0.6; // جاذبية
+        for(let b of balls) {
+            b.vy += 0.7;
             b.y += b.vy;
             b.x += b.vx;
-
-            // حدود الأرضية والجدران
-            if (b.y + b.radius > canvas.height) {
+            if(b.y+b.radius > canvas.height) {
                 b.y = canvas.height - b.radius;
-                b.vy *= -0.4;
+                b.vy *= -0.3;
             }
-            if (b.x - b.radius < 0) {
-                b.x = b.radius;
-                b.vx *= -0.5;
-            }
-            if (b.x + b.radius > canvas.width) {
-                b.x = canvas.width - b.radius;
-                b.vx *= -0.5;
-            }
-
-            // احتكاك بسيط
+            if(b.x-b.radius < 0) { b.x = b.radius; b.vx *= -0.5; }
+            if(b.x+b.radius > canvas.width) { b.x = canvas.width-b.radius; b.vx *= -0.5; }
             b.vy *= 0.995;
             b.vx *= 0.99;
-
             b.draw(ctx);
         }
-
-        // رسم الكرة الحالية مع خط توجيه
-        if (currentBall) {
-            // خط متقطع
-            ctx.setLineDash([5, 5]);
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        // جسيمات
+        for(let i=particles.length-1;i>=0;i--) {
+            particles[i].update();
+            particles[i].draw(ctx);
+            if(particles[i].life <= 0) particles.splice(i,1);
+        }
+        // الكرة الحالية
+        if(currentBall && !gameOverActive) {
+            currentBall.y = 25;
+            ctx.setLineDash([6,6]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
             ctx.beginPath();
-            ctx.moveTo(currentBall.x, currentBall.radius);
+            ctx.moveTo(currentBall.x, currentBall.radius+5);
             ctx.lineTo(currentBall.x, canvas.height - currentBall.radius);
             ctx.stroke();
             ctx.setLineDash([]);
-
-            currentBall.y = 30; // تبقى في الأعلى
             currentBall.draw(ctx);
         }
-
+        // نافذة نهاية اللعبة
+        if(gameOverActive) {
+            drawOverlay();
+        }
         animationId = requestAnimationFrame(gameLoop);
     }
 
     // ---------- أحداث التحكم ----------
-    canvas.addEventListener('mousemove', (e) => {
-        if (!currentBall || !gameRunning) return;
+    canvas.addEventListener('mousemove', e => {
+        if(!currentBall || !gameRunning || gameOverActive) return;
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width - currentBall.radius, x));
+        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width-currentBall.radius, x));
     });
-    canvas.addEventListener('click', (e) => {
-        if (!gameRunning || !currentBall) return;
-        dropBall(currentBall.x);
+    canvas.addEventListener('click', e => {
+        if(gameOverActive) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            for(let btn of overlayButtons) {
+                if(mx >= btn.x && mx <= btn.x+btn.w && my >= btn.y && my <= btn.y+btn.h) {
+                    btn.onClick();
+                    return;
+                }
+            }
+            return;
+        }
+        if(currentBall && gameRunning && energy>0) dropBall(currentBall.x);
     });
-
-    canvas.addEventListener('touchmove', (e) => {
+    canvas.addEventListener('touchmove', e => {
         e.preventDefault();
-        if (!currentBall || !gameRunning) return;
+        if(!currentBall || !gameRunning || gameOverActive) return;
         const rect = canvas.getBoundingClientRect();
         const x = e.touches[0].clientX - rect.left;
-        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width - currentBall.radius, x));
-    }, {passive: false});
-    canvas.addEventListener('touchend', (e) => {
+        currentBall.x = Math.max(currentBall.radius, Math.min(canvas.width-currentBall.radius, x));
+    }, {passive:false});
+    canvas.addEventListener('touchend', e => {
         e.preventDefault();
-        if (!gameRunning || !currentBall) return;
-        dropBall(currentBall.x);
+        if(gameOverActive) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.changedTouches[0].clientX - rect.left;
+            const my = e.changedTouches[0].clientY - rect.top;
+            for(let btn of overlayButtons) {
+                if(mx >= btn.x && mx <= btn.x+btn.w && my >= btn.y && my <= btn.y+btn.h) {
+                    btn.onClick();
+                    return;
+                }
+            }
+            return;
+        }
+        if(currentBall && gameRunning && energy>0) dropBall(currentBall.x);
     });
 
-    // أزرار التحكم
-    startBtn.addEventListener('click', startGame);
-    exitBtn.addEventListener('click', goHome);
+    // ---------- أزرار الواجهة ----------
+    startBtn.addEventListener('click', ()=>{
+        homeScreen.style.display = 'none';
+        gameScreen.style.display = 'flex';
+        resizeCanvas();
+        balls = []; currentBall = null; score = 0; energy = maxEnergy;
+        gameOverActive = false;
+        gameRunning = true;
+        liveEnergySpan.textContent = energy;
+        liveScoreSpan.textContent = '0';
+        updateDailyUI();
+        spawnBall();
+        if(animationId) cancelAnimationFrame(animationId);
+        gameLoop();
+    });
+    exitBtn.addEventListener('click', ()=>{
+        if(gameOverActive) {
+            walletPoints += finalScore;
+            walletSpan.textContent = walletPoints.toLocaleString();
+        } else {
+            walletPoints += score;
+            walletSpan.textContent = walletPoints.toLocaleString();
+        }
+        gameRunning = false;
+        gameOverActive = false;
+        cancelAnimationFrame(animationId);
+        balls = []; currentBall = null;
+        gameScreen.style.display = 'none';
+        homeScreen.style.display = 'flex';
+    });
+
+    // دالة roundRect للكانفاس
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
+            this.beginPath();
+            this.moveTo(x + r.tl, y);
+            this.lineTo(x + w - r.tr, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+            this.lineTo(x + w, y + h - r.br);
+            this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+            this.lineTo(x + r.bl, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+            this.lineTo(x, y + r.tl);
+            this.quadraticCurveTo(x, y, x + r.tl, y);
+            this.closePath();
+            return this;
+        };
+    }
 </script>
 </body>
 </html>
