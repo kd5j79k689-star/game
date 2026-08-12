@@ -2,16 +2,17 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doodle Jump - لعبة القفز الاحترافية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Doodle Jump Pro - لعبة القفز الاحترافية</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: #1a1a2e;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,61 +21,128 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            -webkit-touch-callout: none;
         }
         .game-wrapper {
             position: relative;
-            border-radius: 16px;
-            box-shadow: 0 0 40px rgba(0,200,100,0.3), 0 20px 60px rgba(0,0,0,0.5);
+            border-radius: 20px;
+            box-shadow: 0 0 60px rgba(0, 255, 150, 0.25), 0 25px 80px rgba(0,0,0,0.6);
             overflow: hidden;
+            background: #111;
         }
         canvas {
             display: block;
-            border-radius: 16px;
+            border-radius: 20px;
         }
         .mobile-controls {
             display: none;
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             left: 0;
             right: 0;
-            padding: 0 20px;
+            padding: 0 25px;
             justify-content: space-between;
             pointer-events: none;
-            z-index: 10;
+            z-index: 20;
         }
         .ctrl-btn {
-            width: 70px;
-            height: 70px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255,255,255,0.25);
             color: white;
-            font-size: 28px;
+            font-size: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             pointer-events: auto;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.12s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .ctrl-btn:active {
-            background: rgba(255,255,255,0.5);
-            transform: scale(0.9);
+            background: rgba(255,255,255,0.45);
+            transform: scale(0.88);
+        }
+        .hud-top {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 15;
+        }
+        .score-box, .combo-box, .power-box {
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            padding: 8px 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .combo-box {
+            background: linear-gradient(90deg, rgba(255,109,0,0.8), rgba(255,60,0,0.7));
+            font-weight: bold;
+            animation: pulse 0.6s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        .power-box {
+            background: linear-gradient(90deg, #7c4dff, #651fff);
+            font-size: 12px;
+        }
+        .achievement-toast {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #222;
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 30;
+            pointer-events: none;
+            box-shadow: 0 8px 25px rgba(255,180,0,0.5);
+            white-space: nowrap;
+        }
+        .achievement-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .pause-btn {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 25;
+            backdrop-filter: blur(6px);
         }
         @media (max-width: 600px) {
-            .mobile-controls {
-                display: flex;
-            }
-            canvas {
-                border-radius: 0;
-            }
-            .game-wrapper {
-                border-radius: 0;
-                width: 100vw;
-                height: 100vh;
-            }
+            .mobile-controls { display: flex; }
+            canvas, .game-wrapper { border-radius: 0; }
+            .game-wrapper { width: 100vw; height: 100vh; }
+            .pause-btn { top: 10px; left: 10px; }
         }
     </style>
 </head>
@@ -82,6 +150,11 @@
 
 <div class="game-wrapper" id="gameWrapper">
     <canvas id="gameCanvas"></canvas>
+    
+    <button class="pause-btn" id="pauseBtn" style="display:none;">⏸</button>
+    
+    <div class="achievement-toast" id="toast"></div>
+    
     <div class="mobile-controls">
         <button class="ctrl-btn" id="btnLeft">◀</button>
         <button class="ctrl-btn" id="btnRight">▶</button>
@@ -89,845 +162,1050 @@
 </div>
 
 <script>
-    (function() {
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const wrapper = document.getElementById('gameWrapper');
+(function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrapper = document.getElementById('gameWrapper');
+    const toastEl = document.getElementById('toast');
+    const pauseBtn = document.getElementById('pauseBtn');
 
-        // حجم ديناميكي يتكيف مع الشاشة
-        const BASE_WIDTH = 400;
-        const BASE_HEIGHT = 600;
-        let scale = 1;
+    // ==================== إعدادات أساسية ====================
+    const BASE_WIDTH = 400;
+    const BASE_HEIGHT = 650;
+    let scale = 1;
+    let isPaused = false;
 
-        function resizeCanvas() {
-            const maxWidth = Math.min(window.innerWidth, 500);
-            const maxHeight = Math.min(window.innerHeight, 800);
-            scale = Math.min(maxWidth / BASE_WIDTH, maxHeight / BASE_HEIGHT);
-            canvas.width = BASE_WIDTH;
-            canvas.height = BASE_HEIGHT;
-            canvas.style.width = BASE_WIDTH * scale + 'px';
-            canvas.style.height = BASE_HEIGHT * scale + 'px';
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+    function resizeCanvas() {
+        const maxW = Math.min(window.innerWidth, 480);
+        const maxH = Math.min(window.innerHeight, 850);
+        scale = Math.min(maxW / BASE_WIDTH, maxH / BASE_HEIGHT);
+        canvas.width = BASE_WIDTH;
+        canvas.height = BASE_HEIGHT;
+        canvas.style.width = BASE_WIDTH * scale + 'px';
+        canvas.style.height = BASE_HEIGHT * scale + 'px';
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-        // ==================== حالة اللعبة ====================
-        const STATE = {
-            START: 'start',
-            PLAYING: 'playing',
-            OVER: 'over'
+    // ==================== حالة اللعبة ====================
+    const STATE = { START: 'start', PLAYING: 'playing', OVER: 'over', PAUSED: 'paused' };
+    let gameState = STATE.START;
+    
+    // بيانات اللاعب الدائمة
+    let highScore = parseInt(localStorage.getItem('dj_highScore')) || 0;
+    let totalStars = parseInt(localStorage.getItem('dj_totalStars')) || 0;
+    let gamesPlayed = parseInt(localStorage.getItem('dj_games')) || 0;
+    let maxComboEver = parseInt(localStorage.getItem('dj_maxCombo')) || 0;
+    let unlockedSkins = JSON.parse(localStorage.getItem('dj_skins') || '["default"]');
+    let currentSkin = localStorage.getItem('dj_currentSkin') || 'default';
+    let achievements = JSON.parse(localStorage.getItem('dj_achievements') || '[]');
+
+    // جلسة اللعب الحالية
+    let score = 0;
+    let comboCount = 0;
+    let maxCombo = 0;
+    let starsCollected = 0;
+    let difficultyLevel = 1;
+    let particles = [];
+    let floatingTexts = [];
+    let screenShake = 0;
+    let powerUps = [];
+    let activePower = null; // { type, timer }
+    let missions = [];
+    let missionProgress = {};
+
+    // ==================== اللاعب ====================
+    const doodler = {
+        x: 180, y: 320,
+        width: 46, height: 46,
+        dx: 0, dy: 0,
+        gravity: 0.42,
+        jumpStrength: -10.8,
+        speed: 5.8,
+        facingRight: true,
+        invincible: false,
+        trail: []
+    };
+
+    // ==================== أنواع المنصات ====================
+    const PLATFORM = {
+        NORMAL: 'normal',
+        MOVING: 'moving',
+        SPRING: 'spring',
+        BREAKING: 'breaking',
+        CLOUD: 'cloud',
+        BOOST: 'boost' // منصة تسريع جديدة
+    };
+
+    let platforms = [];
+    const PW = 70, PH = 15;
+
+    function createPlatform(x, y, type = PLATFORM.NORMAL) {
+        return {
+            x, y, width: PW, height: PH, type,
+            dx: (Math.random() - 0.5) * 2.8,
+            moveRange: 55 + Math.random() * 50,
+            originX: x,
+            broken: false,
+            alpha: 1,
+            bounce: type === PLATFORM.SPRING ? -16.5 : (type === PLATFORM.BOOST ? -14 : -10.8)
         };
-        let gameState = STATE.START;
-        let score = 0;
-        let highScore = parseInt(localStorage.getItem('doodleJumpHighScore')) || 0;
-        let comboCount = 0;
-        let maxCombo = 0;
-        let particles = [];
-        let stars = [];
-        let screenShake = 0;
-        let difficultyLevel = 1;
+    }
 
-        // ==================== اللاعب ====================
-        const doodler = {
-            x: 180,
-            y: 300,
-            width: 44,
-            height: 44,
-            dx: 0,
-            dy: 0,
-            gravity: 0.45,
-            jumpStrength: -10.5,
-            speed: 5.5,
-            facingRight: true,
-            eyeBlinkTimer: 0,
-            trailPositions: []
-        };
-
-        // ==================== المنصات ====================
-        const PLATFORM_TYPES = {
-            NORMAL: 'normal',
-            MOVING: 'moving',
-            SPRING: 'spring',
-            BREAKING: 'breaking',
-            CLOUD: 'cloud'
-        };
-
-        let platforms = [];
-        const platformWidth = 68;
-        const platformHeight = 14;
-
-        function createPlatform(x, y, type = PLATFORM_TYPES.NORMAL) {
-            return {
-                x: x,
-                y: y,
-                width: platformWidth,
-                height: platformHeight,
-                type: type,
-                dx: (Math.random() - 0.5) * 2.5,
-                moveRange: 60 + Math.random() * 40,
-                originX: x,
-                broken: false,
-                springBounce: -15,
-                alpha: 1
-            };
+    function createPlatforms() {
+        platforms = [];
+        platforms.push(createPlatform(doodler.x - 12, doodler.y + 75, PLATFORM.NORMAL));
+        
+        for (let i = 1; i < 9; i++) {
+            let x = Math.random() * (BASE_WIDTH - PW);
+            let y = BASE_HEIGHT - 80 * i - 40;
+            let type = getPlatformType(i);
+            platforms.push(createPlatform(x, y, type));
         }
+    }
 
-        function createPlatforms() {
-            platforms = [];
-            // منصة البداية تحت اللاعب
-            platforms.push(createPlatform(doodler.x - 10, doodler.y + 70, PLATFORM_TYPES.NORMAL));
+    function getPlatformType(heightIndex) {
+        const r = Math.random();
+        const lvl = difficultyLevel;
+        if (heightIndex > 5 && r < 0.12 + lvl * 0.02) return PLATFORM.BOOST;
+        if (heightIndex > 3 && r < 0.18 + lvl * 0.03) return PLATFORM.SPRING;
+        if (heightIndex > 2 && r < 0.32 + lvl * 0.04) return PLATFORM.MOVING;
+        if (heightIndex > 4 && r < 0.45 + lvl * 0.05) return PLATFORM.BREAKING;
+        if (heightIndex > 5 && r < 0.55 + lvl * 0.04) return PLATFORM.CLOUD;
+        return PLATFORM.NORMAL;
+    }
 
-            for (let i = 1; i < 8; i++) {
-                let x = Math.random() * (BASE_WIDTH - platformWidth);
-                let y = BASE_HEIGHT - 85 * i - 50;
-                let type = PLATFORM_TYPES.NORMAL;
+    // ==================== نظام الإنجازات ====================
+    const ACHIEVEMENTS = {
+        first_jump: { id: 'first_jump', title: 'أول قفزة!', desc: 'ابدأ رحلتك', icon: '🚀' },
+        combo_5: { id: 'combo_5', title: 'تحريرة 5×', desc: 'اجمع 5 قفزات متتالية', icon: '🔥' },
+        combo_10: { id: 'combo_10', title: 'سيد التحريرة', desc: 'تحريرة 10×', icon: '💥' },
+        score_500: { id: 'score_500', title: 'نصف الألف', desc: 'وصل إلى 500 نقطة', icon: '⭐' },
+        score_1000: { id: 'score_1000', title: 'الألف الذهبية', desc: 'وصل إلى 1000 نقطة', icon: '👑' },
+        stars_20: { id: 'stars_20', title: 'جامع النجوم', desc: 'اجمع 20 نجمة في جولة', icon: '🌟' },
+        survivor: { id: 'survivor', title: 'الناجي', desc: 'العب 10 جولات', icon: '🛡️' },
+        spring_master: { id: 'spring_master', title: 'ملك الينابيع', desc: 'استخدم 15 زنبرك', icon: '⬆️' }
+    };
 
-                // توزيع أنواع المنصات
-                const rand = Math.random();
-                if (i > 2 && rand < 0.15) type = PLATFORM_TYPES.SPRING;
-                else if (i > 2 && rand < 0.35) type = PLATFORM_TYPES.MOVING;
-                else if (i > 3 && rand < 0.50) type = PLATFORM_TYPES.BREAKING;
-                else if (i > 4 && rand < 0.60) type = PLATFORM_TYPES.CLOUD;
+    function unlockAchievement(id) {
+        if (achievements.includes(id)) return;
+        achievements.push(id);
+        localStorage.setItem('dj_achievements', JSON.stringify(achievements));
+        const a = ACHIEVEMENTS[id];
+        if (a) showToast(`${a.icon} ${a.title}`);
+    }
 
-                platforms.push(createPlatform(x, y, type));
-            }
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        setTimeout(() => toastEl.classList.remove('show'), 2800);
+    }
+
+    // ==================== المهام اليومية ====================
+    function generateMissions() {
+        const pool = [
+            { id: 'collect_stars', text: 'اجمع 15 نجمة', target: 15, reward: 'stars', reward: 50 },
+            { id: 'reach_score', text: 'وصل إلى 400 نقطة', target: 400, key: 'score', reward: 80 },
+            { id: 'combo_mission', text: 'احصل على تحريرة 8×', target: 8, key: 'combo', reward: 60 },
+            { id: 'use_springs', text: 'استخدم 8 ينابيع', target: 8, key: 'springs', reward: 40 }
+        ];
+        // اختيار مهمتين
+        missions = [];
+        const shuffled = pool.sort(() => Math.random() - 0.5);
+        missions.push({ ...shuffled[0], progress: 0, done: false });
+        missions.push({ ...shuffled[1], progress: 0, done: false });
+        missionProgress = { stars: 0, score: 0, combo: 0, springs: 0 };
+    }
+
+    // ==================== نظام الصوت ====================
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playTone(freq, type, dur, vol = 0.09, glide = null) {
+        if (!audioCtx) return;
+        try {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = type;
+            o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            if (glide) o.frequency.linearRampToValueAtTime(glide, audioCtx.currentTime + dur);
+            g.gain.setValueAtTime(vol, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.start();
+            o.stop(audioCtx.currentTime + dur);
+        } catch(e) {}
+    }
+
+    const sfx = {
+        jump: () => playTone(280, 'square', 0.09, 0.07, 520),
+        spring: () => { playTone(180, 'square', 0.14, 0.08, 750); setTimeout(() => playTone(420, 'square', 0.1, 0.07, 950), 70); },
+        break: () => playTone(70, 'sawtooth', 0.18, 0.14, 35),
+        coin: () => playTone(880, 'square', 0.07, 0.06, 1400),
+        power: () => playTone(400, 'triangle', 0.2, 0.1, 900),
+        death: () => playTone(50, 'sawtooth', 0.4, 0.28, 20),
+        combo: () => playTone(600, 'square', 0.12, 0.09, 1100),
+        achieve: () => { playTone(500, 'sine', 0.1, 0.1, 800); setTimeout(() => playTone(800, 'sine', 0.15, 0.1, 1200), 100); }
+    };
+
+    // ==================== الجزيئات والنصوص ====================
+    function spawnParticles(x, y, color, count = 14, speed = 4) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * speed * 2,
+                vy: (Math.random() - 0.5) * speed * 2 - 1.5,
+                life: 1,
+                decay: 0.018 + Math.random() * 0.03,
+                size: 2 + Math.random() * 5,
+                color
+            });
         }
+    }
 
-        // ==================== نظام الصوت ====================
-        let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+    function addFloatingText(x, y, text, color = '#ffd700') {
+        floatingTexts.push({ x, y, text, color, life: 1, vy: -1.8 });
+    }
+
+    // ==================== النجوم والطاقة ====================
+    let collectibles = [];
+
+    function spawnCollectible(x, y) {
+        const r = Math.random();
+        if (r < 0.38) {
+            collectibles.push({
+                x: x + PW / 2,
+                y: y - 28,
+                type: 'star',
+                radius: 11,
+                collected: false,
+                bob: Math.random() * Math.PI * 2
+            });
+        } else if (r < 0.48 && difficultyLevel > 1) {
+            // طاقة نادرة
+            const types = ['shield', 'magnet', 'double'];
+            collectibles.push({
+                x: x + PW / 2,
+                y: y - 32,
+                type: types[Math.floor(Math.random() * types.length)],
+                radius: 13,
+                collected: false,
+                bob: Math.random() * Math.PI * 2
+            });
         }
+    }
 
-        function playSound(freq, type, duration, vol = 0.1, glideTo = null) {
-            if (!audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                if (glideTo) osc.frequency.linearRampToValueAtTime(glideTo, audioCtx.currentTime + duration);
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(audioCtx.currentTime);
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
+    // ==================== رسم محسن ====================
+    function roundRect(x, y, w, h, r) {
+        r = Math.min(r, w/2, h/2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function drawDoodler() {
+        const { x, y, width, height, facingRight } = doodler;
+        ctx.save();
+
+        // أثر الحركة
+        if (doodler.dy < -2) {
+            doodler.trail.push({ x: x + width/2, y: y + height, life: 0.6 });
+            if (doodler.trail.length > 8) doodler.trail.shift();
         }
+        doodler.trail.forEach((t, i) => {
+            ctx.globalAlpha = t.life * (i / doodler.trail.length);
+            ctx.fillStyle = '#a8e600';
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 6 * t.life, 0, Math.PI * 2);
+            ctx.fill();
+            t.life -= 0.04;
+        });
+        doodler.trail = doodler.trail.filter(t => t.life > 0);
+        ctx.globalAlpha = 1;
 
-        function sfxJump() { playSound(300, 'square', 0.1, 0.08, 600); }
-        function sfxSpring() { playSound(200, 'square', 0.15, 0.06, 800); setTimeout(() => playSound(400, 'square', 0.1, 0.06, 900), 60); }
-        function sfxBreak() { playSound(80, 'sawtooth', 0.15, 0.12, 40); }
-        function sfxCoin() { playSound(800, 'square', 0.08, 0.06, 1200); }
-        function sfxDeath() { playSound(60, 'sawtooth', 0.3, 0.3, 30); }
-        function sfxCombo() { playSound(500, 'square', 0.12, 0.08, 1000); }
+        // ظل
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 4;
 
-        // ==================== الجزيئات ====================
-        function spawnParticles(x, y, color, count = 12) {
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5 - 2,
-                    life: 1,
-                    decay: 0.02 + Math.random() * 0.04,
-                    size: 2 + Math.random() * 4,
-                    color: color
-                });
-            }
-        }
-
-        function spawnStars(x, y) {
-            const count = 3 + Math.floor(Math.random() * 4);
-            for (let i = 0; i < count; i++) {
-                stars.push({
-                    x: x + (Math.random() - 0.5) * 40,
-                    y: y - Math.random() * 20,
-                    vy: -3 - Math.random() * 4,
-                    life: 1,
-                    decay: 0.03,
-                    size: 6 + Math.random() * 8
-                });
-            }
-        }
-
-        // ==================== النجوم القابلة للتجميع ====================
-        let collectibleStars = [];
-        function spawnCollectibleStar(x, y) {
-            if (Math.random() < 0.4) {
-                collectibleStars.push({
-                    x: x + platformWidth / 2,
-                    y: y - 25,
-                    radius: 10,
-                    collected: false,
-                    bobOffset: Math.random() * Math.PI * 2
-                });
-            }
-        }
-
-        // ==================== رسم محسن مع roundRect آمن ====================
-        function roundRect(x, y, w, h, r) {
-            if (ctx.roundRect) {
-                ctx.beginPath();
-                ctx.roundRect(x, y, w, h, r);
-                ctx.fill();
-            } else {
-                // fallback يدوي
-                r = Math.min(r, w/2, h/2);
-                ctx.beginPath();
-                ctx.moveTo(x + r, y);
-                ctx.lineTo(x + w - r, y);
-                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-                ctx.lineTo(x + w, y + h - r);
-                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-                ctx.lineTo(x + r, y + h);
-                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-                ctx.lineTo(x, y + r);
-                ctx.quadraticCurveTo(x, y, x + r, y);
-                ctx.closePath();
-                ctx.fill();
-            }
-        }
-
-        function drawDoodler() {
-            const { x, y, width, height, facingRight } = doodler;
-            ctx.save();
-            const cx = x + width / 2;
-            const cy = y + height / 2;
-
-            // تأثير الظل
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetY = 3;
-
-            // الجسم
-            const bodyGrad = ctx.createLinearGradient(x, y, x, y + height);
-            bodyGrad.addColorStop(0, '#c8e600');
+        // الجسم حسب السكين
+        let bodyGrad = ctx.createLinearGradient(x, y, x, y + height);
+        if (currentSkin === 'gold') {
+            bodyGrad.addColorStop(0, '#ffd700');
+            bodyGrad.addColorStop(0.5, '#ffaa00');
+            bodyGrad.addColorStop(1, '#cc8800');
+        } else if (currentSkin === 'neon') {
+            bodyGrad.addColorStop(0, '#00ffcc');
+            bodyGrad.addColorStop(1, '#00aaff');
+        } else {
+            bodyGrad.addColorStop(0, '#d4f000');
             bodyGrad.addColorStop(0.5, '#a8c200');
-            bodyGrad.addColorStop(1, '#7a8c00');
-            ctx.fillStyle = bodyGrad;
-            roundRect(x, y, width, height, 12);
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
+            bodyGrad.addColorStop(1, '#6a8000');
+        }
+        ctx.fillStyle = bodyGrad;
+        roundRect(x, y, width, height, 14);
 
-            // خطوط الجسم
-            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-            ctx.lineWidth = 1.5;
+        // درع إذا كان نشط
+        if (activePower && activePower.type === 'shield') {
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.7)';
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.roundRect(x + 2, y + 2, width - 4, height - 4, 10);
+            ctx.arc(x + width/2, y + height/2, width/2 + 8, 0, Math.PI * 2);
             ctx.stroke();
+        }
 
-            // العيون
-            const eyeY = y + 14;
-            // بياض العين
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(x + 14, eyeY, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 30, eyeY, 7, 0, Math.PI * 2);
-            ctx.fill();
+        ctx.shadowColor = 'transparent';
 
-            // بؤبؤ العين (يتحرك قليلاً مع الاتجاه)
-            const pupilOffset = facingRight ? 2 : -2;
-            ctx.fillStyle = '#111';
-            ctx.beginPath();
-            ctx.arc(x + 14 + pupilOffset, eyeY, 3.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 30 + pupilOffset, eyeY, 3.5, 0, Math.PI * 2);
-            ctx.fill();
+        // العيون
+        const eyeY = y + 15;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x + 15, eyeY, 7.5, 0, Math.PI * 2);
+        ctx.arc(x + 32, eyeY, 7.5, 0, Math.PI * 2);
+        ctx.fill();
 
-            // لمعة العين
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(x + 12 + pupilOffset, eyeY - 2, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 28 + pupilOffset, eyeY - 2, 1.5, 0, Math.PI * 2);
-            ctx.fill();
+        const po = facingRight ? 2.5 : -2.5;
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.arc(x + 15 + po, eyeY, 3.8, 0, Math.PI * 2);
+        ctx.arc(x + 32 + po, eyeY, 3.8, 0, Math.PI * 2);
+        ctx.fill();
 
-            // الأنف (يغير اتجاهه)
-            ctx.fillStyle = '#5c7a00';
-            if (facingRight) {
-                ctx.fillRect(x + 36, y + 20, 18, 7);
-                ctx.fillRect(x + 50, y + 17, 6, 13);
+        // لمعة
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x + 13 + po, eyeY - 2, 1.6, 0, Math.PI * 2);
+        ctx.arc(x + 30 + po, eyeY - 2, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // الأنف
+        ctx.fillStyle = currentSkin === 'gold' ? '#aa7700' : '#4a6a00';
+        if (facingRight) {
+            ctx.fillRect(x + 38, y + 21, 17, 7);
+            ctx.fillRect(x + 51, y + 18, 6, 13);
+        } else {
+            ctx.fillRect(x - 9, y + 21, 17, 7);
+            ctx.fillRect(x - 11, y + 18, 6, 13);
+        }
+
+        // ابتسامة
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(x + width/2, y + 30, 9, 0.15, Math.PI - 0.15);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawPlatform(p) {
+        if (p.broken && p.type !== PLATFORM.CLOUD) return;
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+
+        switch (p.type) {
+            case PLATFORM.NORMAL:
+                ctx.fillStyle = '#43a047';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 7;
+                ctx.shadowOffsetY = 3;
+                roundRect(p.x, p.y, p.width, p.height, 8);
+                ctx.fillStyle = 'rgba(255,255,255,0.28)';
+                roundRect(p.x + 4, p.y + 2, p.width - 8, 5, 4);
+                break;
+
+            case PLATFORM.MOVING:
+                const g = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+                g.addColorStop(0, '#7c4dff');
+                g.addColorStop(1, '#5e35b1');
+                ctx.fillStyle = g;
+                ctx.shadowColor = 'rgba(120,80,255,0.5)';
+                ctx.shadowBlur = 12;
+                roundRect(p.x, p.y, p.width, p.height, 8);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('↔', p.x + p.width/2, p.y + 12);
+                break;
+
+            case PLATFORM.SPRING:
+                ctx.fillStyle = '#ff9800';
+                ctx.shadowColor = 'rgba(255,150,0,0.55)';
+                ctx.shadowBlur = 14;
+                roundRect(p.x, p.y, p.width, p.height, 8);
+                ctx.fillStyle = '#ffd54f';
+                roundRect(p.x + 12, p.y - 10, p.width - 24, 12, 5);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⬆', p.x + p.width/2, p.y + 12);
+                break;
+
+            case PLATFORM.BREAKING:
+                ctx.fillStyle = '#e53935';
+                ctx.shadowColor = 'rgba(229,57,53,0.45)';
+                ctx.shadowBlur = 9;
+                roundRect(p.x, p.y, p.width, p.height, 8);
+                ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(p.x + 12, p.y + 3);
+                ctx.lineTo(p.x + 28, p.y + p.height - 3);
+                ctx.moveTo(p.x + 40, p.y + 2);
+                ctx.lineTo(p.x + 52, p.y + p.height - 4);
+                ctx.stroke();
+                break;
+
+            case PLATFORM.CLOUD:
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.shadowColor = 'rgba(255,255,255,0.4)';
+                ctx.shadowBlur = 18;
+                roundRect(p.x, p.y, p.width, p.height, 22);
+                ctx.fillStyle = 'rgba(255,255,255,0.55)';
+                ctx.beginPath();
+                ctx.arc(p.x + 16, p.y + 2, 19, 0, Math.PI*2);
+                ctx.arc(p.x + p.width/2, p.y - 6, 24, 0, Math.PI*2);
+                ctx.arc(p.x + p.width - 16, p.y + 2, 19, 0, Math.PI*2);
+                ctx.fill();
+                break;
+
+            case PLATFORM.BOOST:
+                const bg = ctx.createLinearGradient(p.x, p.y, p.x + p.width, p.y);
+                bg.addColorStop(0, '#00e5ff');
+                bg.addColorStop(0.5, '#00b0ff');
+                bg.addColorStop(1, '#2979ff');
+                ctx.fillStyle = bg;
+                ctx.shadowColor = 'rgba(0,180,255,0.6)';
+                ctx.shadowBlur = 15;
+                roundRect(p.x, p.y, p.width, p.height, 8);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚡', p.x + p.width/2, p.y + 12);
+                break;
+        }
+        ctx.restore();
+    }
+
+    // ==================== التحديث ====================
+    function updatePlatforms() {
+        if (doodler.y < BASE_HEIGHT * 0.42 && doodler.dy < 0) {
+            const off = -doodler.dy;
+            doodler.y = BASE_HEIGHT * 0.42;
+            platforms.forEach(p => p.y += off);
+            collectibles.forEach(c => c.y += off);
+            score += Math.abs(off) * 0.18 * (1 + comboCount * 0.05);
+        }
+
+        while (platforms.length && platforms[0].y > BASE_HEIGHT + 60) platforms.shift();
+
+        while (platforms.length < 9) {
+            const lastY = platforms.length ? platforms[platforms.length-1].y : BASE_HEIGHT;
+            const x = Math.random() * (BASE_WIDTH - PW);
+            const y = lastY - (65 + Math.random() * 35);
+            const type = getPlatformType(10);
+            const np = createPlatform(x, y, type);
+            platforms.push(np);
+            spawnCollectible(x, y);
+        }
+
+        platforms.forEach(p => {
+            if (p.type === PLATFORM.MOVING && !p.broken) {
+                p.x += p.dx;
+                if (p.x > p.originX + p.moveRange || p.x < p.originX - p.moveRange) p.dx *= -1;
+            }
+            if (p.type === PLATFORM.CLOUD && p.broken) p.alpha -= 0.04;
+        });
+
+        collectibles = collectibles.filter(c => !c.collected && c.y < BASE_HEIGHT + 80);
+    }
+
+    function checkCollision() {
+        if (doodler.dy <= 0) return;
+
+        for (let p of platforms) {
+            if (p.broken) continue;
+
+            const bottom = doodler.y + doodler.height;
+            if (doodler.x + doodler.width > p.x &&
+                doodler.x < p.x + p.width &&
+                bottom > p.y &&
+                bottom < p.y + p.height + Math.abs(doodler.dy) + 4) {
+
+                // قفزة
+                if (p.type === PLATFORM.SPRING || p.type === PLATFORM.BOOST) {
+                    doodler.dy = p.bounce;
+                    sfx.spring();
+                    spawnParticles(doodler.x + 23, bottom, p.type === PLATFORM.BOOST ? '#00e5ff' : '#ff9800', 22);
+                    screenShake = 9;
+                    missionProgress.springs = (missionProgress.springs || 0) + 1;
+                    addFloatingText(doodler.x + 23, doodler.y, p.type === PLATFORM.BOOST ? '⚡ BOOST!' : '⬆ SUPER!', '#ffd700');
+                } else if (p.type === PLATFORM.BREAKING) {
+                    p.broken = true;
+                    doodler.dy = doodler.jumpStrength * 0.75;
+                    sfx.break();
+                    spawnParticles(p.x + PW/2, p.y, '#e53935', 20);
+                    screenShake = 6;
+                    comboCount = 0;
+                } else if (p.type === PLATFORM.CLOUD) {
+                    p.broken = true;
+                    doodler.dy = doodler.jumpStrength * 1.15;
+                    sfx.jump();
+                    spawnParticles(doodler.x + 23, bottom, '#ffffff', 10);
+                    comboCount++;
+                } else {
+                    doodler.dy = doodler.jumpStrength;
+                    sfx.jump();
+                    spawnParticles(doodler.x + 23, bottom, '#43a047', 9);
+                    comboCount++;
+                }
+
+                if (comboCount > maxCombo) maxCombo = comboCount;
+                if (comboCount >= 5) unlockAchievement('combo_5');
+                if (comboCount >= 10) unlockAchievement('combo_10');
+                if (comboCount > 0 && comboCount % 5 === 0) {
+                    sfx.combo();
+                    addFloatingText(BASE_WIDTH/2, 120, `${comboCount}x COMBO!`, '#ff6d00');
+                }
+
+                // تحقق من المهام
+                if (comboCount > (missionProgress.combo || 0)) missionProgress.combo = comboCount;
+
+                return;
+            }
+        }
+    }
+
+    function checkCollectibles() {
+        collectibles.forEach(c => {
+            if (c.collected) return;
+            const dx = (doodler.x + doodler.width/2) - c.x;
+            const dy = (doodler.y + doodler.height/2) - c.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            // مغناطيس
+            const magnetActive = activePower && activePower.type === 'magnet';
+            if (magnetActive && dist < 90) {
+                c.x += dx * -0.12;
+                c.y += dy * -0.12;
+            }
+
+            if (dist < 28) {
+                c.collected = true;
+                if (c.type === 'star') {
+                    score += 12 + comboCount;
+                    starsCollected++;
+                    totalStars++;
+                    missionProgress.stars = (missionProgress.stars || 0) + 1;
+                    sfx.coin();
+                    spawnParticles(c.x, c.y, '#ffd700', 16);
+                    addFloatingText(c.x, c.y, '+12', '#ffd700');
+                    if (starsCollected >= 20) unlockAchievement('stars_20');
+                } else {
+                    // طاقة
+                    activePower = { type: c.type, timer: 420 }; // ~7 ثوان
+                    sfx.power();
+                    spawnParticles(c.x, c.y, '#7c4dff', 25);
+                    const names = { shield: '🛡️ درع', magnet: '🧲 مغناطيس', double: '💫 ضعف نقاط' };
+                    addFloatingText(c.x, c.y - 10, names[c.type], '#b388ff');
+                    showToast(names[c.type] + ' مفعل!');
+                }
+            }
+        });
+    }
+
+    function update() {
+        if (gameState !== STATE.PLAYING || isPaused) return;
+
+        // الجاذبية والسرعة
+        doodler.dy += doodler.gravity;
+        doodler.x += doodler.dx;
+        doodler.y += doodler.dy;
+
+        difficultyLevel = 1 + Math.floor(score / 120);
+        doodler.gravity = 0.42 + difficultyLevel * 0.018;
+        doodler.speed = 5.8 + difficultyLevel * 0.25;
+
+        // التفاف
+        if (doodler.x + doodler.width < -5) doodler.x = BASE_WIDTH;
+        if (doodler.x > BASE_WIDTH + 5) doodler.x = -doodler.width;
+
+        if (doodler.dx > 0.3) doodler.facingRight = true;
+        if (doodler.dx < -0.3) doodler.facingRight = false;
+
+        checkCollision();
+        checkCollectibles();
+        updatePlatforms();
+
+        // الطاقة
+        if (activePower) {
+            activePower.timer--;
+            if (activePower.timer <= 0) {
+                activePower = null;
+                showToast('انتهت الطاقة');
+            }
+        }
+
+        // مضاعف النقاط
+        if (activePower && activePower.type === 'double') {
+            // يتم تطبيقه عند جمع النجوم والنقاط
+        }
+
+        // الجزيئات والنصوص
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+        });
+        particles = particles.filter(p => p.life > 0);
+
+        floatingTexts.forEach(t => {
+            t.y += t.vy; t.life -= 0.02;
+        });
+        floatingTexts = floatingTexts.filter(t => t.life > 0);
+
+        if (screenShake > 0) screenShake *= 0.82;
+        if (screenShake < 0.15) screenShake = 0;
+
+        // الموت
+        if (doodler.y > BASE_HEIGHT + 40) {
+            if (activePower && activePower.type === 'shield') {
+                // إنقاذ بالدرع
+                doodler.y = BASE_HEIGHT - 80;
+                doodler.dy = -12;
+                activePower = null;
+                spawnParticles(doodler.x + 23, doodler.y + 40, '#64b5f6', 30);
+                showToast('🛡️ الدرع أنقذك!');
+                sfx.power();
             } else {
-                ctx.fillRect(x - 10, y + 20, 18, 7);
-                ctx.fillRect(x - 12, y + 17, 6, 13);
-            }
-
-            // ابتسامة
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.arc(x + width/2, y + 28, 8, 0.1, Math.PI - 0.1);
-            ctx.stroke();
-
-            ctx.restore();
-        }
-
-        function drawPlatform(p) {
-            if (p.broken) return;
-            ctx.save();
-            ctx.globalAlpha = p.alpha;
-
-            switch (p.type) {
-                case PLATFORM_TYPES.NORMAL:
-                    ctx.fillStyle = '#4caf50';
-                    ctx.shadowColor = 'rgba(0,0,0,0.25)';
-                    ctx.shadowBlur = 6;
-                    ctx.shadowOffsetY = 2;
-                    roundRect(p.x, p.y, p.width, p.height, 7);
-                    // لمسة علوية
-                    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                    roundRect(p.x + 3, p.y + 1, p.width - 6, p.height/3, 4);
-                    break;
-
-                case PLATFORM_TYPES.MOVING:
-                    const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
-                    grad.addColorStop(0, '#7c4dff');
-                    grad.addColorStop(1, '#651fff');
-                    ctx.fillStyle = grad;
-                    ctx.shadowColor = 'rgba(100,50,255,0.4)';
-                    ctx.shadowBlur = 10;
-                    ctx.shadowOffsetY = 2;
-                    roundRect(p.x, p.y, p.width, p.height, 7);
-                    // أسهم الاتجاه
-                    ctx.fillStyle = 'white';
-                    ctx.font = '10px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('↔', p.x + p.width/2, p.y + p.height - 3);
-                    break;
-
-                case PLATFORM_TYPES.SPRING:
-                    ctx.fillStyle = '#ff9800';
-                    ctx.shadowColor = 'rgba(255,150,0,0.5)';
-                    ctx.shadowBlur = 12;
-                    roundRect(p.x, p.y, p.width, p.height, 7);
-                    ctx.fillStyle = '#ffcc02';
-                    roundRect(p.x + 10, p.y - 8, p.width - 20, 10, 4);
-                    ctx.fillStyle = 'white';
-                    ctx.font = 'bold 11px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('⬆', p.x + p.width/2, p.y + p.height - 2);
-                    break;
-
-                case PLATFORM_TYPES.BREAKING:
-                    ctx.fillStyle = '#f44336';
-                    ctx.shadowColor = 'rgba(244,67,54,0.4)';
-                    ctx.shadowBlur = 8;
-                    roundRect(p.x, p.y, p.width, p.height, 7);
-                    // شقوق
-                    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x + 10, p.y + 3);
-                    ctx.lineTo(p.x + 25, p.y + p.height - 3);
-                    ctx.moveTo(p.x + 35, p.y + 2);
-                    ctx.lineTo(p.x + 45, p.y + p.height - 4);
-                    ctx.stroke();
-                    break;
-
-                case PLATFORM_TYPES.CLOUD:
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.shadowColor = 'rgba(255,255,255,0.3)';
-                    ctx.shadowBlur = 15;
-                    roundRect(p.x, p.y, p.width, p.height, 20);
-                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                    ctx.beginPath();
-                    ctx.arc(p.x + 15, p.y, 18, 0, Math.PI*2);
-                    ctx.arc(p.x + p.width/2, p.y - 5, 22, 0, Math.PI*2);
-                    ctx.arc(p.x + p.width - 15, p.y, 18, 0, Math.PI*2);
-                    ctx.fill();
-                    break;
-            }
-
-            ctx.restore();
-        }
-
-        // ==================== تحديث المنصات ====================
-        function updatePlatforms() {
-            // تحريك المنصات للأسفل
-            if (doodler.y < BASE_HEIGHT / 2 && doodler.dy < 0) {
-                const offset = -doodler.dy;
-                doodler.y = BASE_HEIGHT / 2;
-                platforms.forEach(p => { p.y += offset; p.originX += offset * 0; });
-                collectibleStars.forEach(s => s.y += offset);
-                score += Math.abs(offset) * 0.15;
-            }
-
-            // إزالة المنصات الخارجة من الأسفل
-            while (platforms.length > 0 && platforms[0].y > BASE_HEIGHT + 50) {
-                platforms.shift();
-            }
-
-            // إضافة منصات جديدة من الأعلى
-            while (platforms.length < 8) {
-                const lastY = platforms.length > 0 ? platforms[platforms.length - 1].y : BASE_HEIGHT;
-                const x = Math.random() * (BASE_WIDTH - platformWidth);
-                const y = lastY - 70 - Math.random() * 30;
-                let type = PLATFORM_TYPES.NORMAL;
-                const rand = Math.random();
-                if (difficultyLevel > 2 && rand < 0.2) type = PLATFORM_TYPES.SPRING;
-                else if (difficultyLevel > 1 && rand < 0.35) type = PLATFORM_TYPES.MOVING;
-                else if (difficultyLevel > 2 && rand < 0.5) type = PLATFORM_TYPES.BREAKING;
-                else if (difficultyLevel > 3 && rand < 0.6) type = PLATFORM_TYPES.CLOUD;
-
-                const newPlat = createPlatform(x, y, type);
-                platforms.push(newPlat);
-                spawnCollectibleStar(x, y);
-            }
-
-            // تحديث المنصات المتحركة
-            platforms.forEach(p => {
-                if (p.type === PLATFORM_TYPES.MOVING && !p.broken) {
-                    p.x += p.dx;
-                    if (p.x > p.originX + p.moveRange || p.x < p.originX - p.moveRange) {
-                        p.dx *= -1;
-                    }
-                }
-                // منصة السحاب تختفي ببطء
-                if (p.type === PLATFORM_TYPES.CLOUD && p.broken) {
-                    p.alpha -= 0.05;
-                }
-            });
-
-            // تحديث النجوم
-            collectibleStars = collectibleStars.filter(s => !s.collected && s.y < BASE_HEIGHT + 50);
-        }
-
-        // ==================== التصادم ====================
-        function checkCollision() {
-            if (doodler.dy <= 0) return; // فقط أثناء النزول
-
-            for (let p of platforms) {
-                if (p.broken && p.type === PLATFORM_TYPES.BREAKING) continue;
-                if (p.broken && p.type === PLATFORM_TYPES.CLOUD) continue;
-
-                const doodlerBottom = doodler.y + doodler.height;
-                const doodlerLeft = doodler.x;
-                const doodlerRight = doodler.x + doodler.width;
-
-                if (
-                    doodlerRight > p.x &&
-                    doodlerLeft < p.x + p.width &&
-                    doodlerBottom > p.y &&
-                    doodlerBottom < p.y + p.height + Math.abs(doodler.dy) + 2
-                ) {
-                    // اصطدام!
-                    if (p.type === PLATFORM_TYPES.SPRING) {
-                        doodler.dy = p.springBounce;
-                        sfxSpring();
-                        spawnParticles(doodler.x + doodler.width/2, doodler.y + doodler.height, '#ff9800', 20);
-                        screenShake = 8;
-                        // ضغط الزنبرك بصرياً
-                        p.y += 5;
-                        setTimeout(() => { if (p) p.y -= 5; }, 150);
-                    } else if (p.type === PLATFORM_TYPES.BREAKING) {
-                        p.broken = true;
-                        doodler.dy = doodler.jumpStrength * 0.8;
-                        sfxBreak();
-                        spawnParticles(p.x + p.width/2, p.y + p.height/2, '#f44336', 18);
-                        screenShake = 5;
-                        comboCount = 0;
-                    } else if (p.type === PLATFORM_TYPES.CLOUD) {
-                        p.broken = true;
-                        doodler.dy = doodler.jumpStrength * 1.1;
-                        sfxJump();
-                        spawnParticles(doodler.x + doodler.width/2, doodler.y + doodler.height, '#ffffff', 8);
-                        comboCount++;
-                    } else {
-                        doodler.dy = doodler.jumpStrength;
-                        sfxJump();
-                        spawnParticles(doodler.x + doodler.width/2, doodler.y + doodler.height, '#4caf50', 8);
-                        comboCount++;
-                    }
-
-                    if (comboCount > maxCombo) maxCombo = comboCount;
-                    if (comboCount > 0 && comboCount % 5 === 0) {
-                        sfxCombo();
-                        spawnStars(doodler.x + doodler.width/2, doodler.y);
-                    }
-
-                    // تجميع نجمة قريبة
-                    collectibleStars.forEach(s => {
-                        if (!s.collected && Math.abs(s.x - doodler.x - doodler.width/2) < 30 && Math.abs(s.y - doodler.y) < 40) {
-                            s.collected = true;
-                            score += 10;
-                            sfxCoin();
-                            spawnParticles(s.x, s.y, '#ffd700', 15);
-                        }
-                    });
-
-                    return;
-                }
-            }
-        }
-
-        // ==================== تحديث عام ====================
-        function update() {
-            if (gameState !== STATE.PLAYING) return;
-
-            // الجاذبية
-            doodler.dy += doodler.gravity;
-            doodler.x += doodler.dx;
-            doodler.y += doodler.dy;
-
-            // صعوبة تدريجية
-            difficultyLevel = 1 + Math.floor(score / 100);
-            doodler.gravity = 0.45 + difficultyLevel * 0.02;
-            doodler.speed = 5.5 + difficultyLevel * 0.3;
-
-            // الالتفاف حول الشاشة
-            if (doodler.x + doodler.width < -10) doodler.x = BASE_WIDTH;
-            if (doodler.x > BASE_WIDTH + 10) doodler.x = -doodler.width;
-
-            // اتجاه اللاعب
-            if (doodler.dx > 0.2) doodler.facingRight = true;
-            if (doodler.dx < -0.2) doodler.facingRight = false;
-
-            checkCollision();
-            updatePlatforms();
-
-            // تحديث الجزيئات
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= p.decay;
-            });
-            particles = particles.filter(p => p.life > 0);
-
-            // تحديث النجوم الطائرة
-            stars.forEach(s => {
-                s.y += s.vy;
-                s.life -= s.decay;
-            });
-            stars = stars.filter(s => s.life > 0);
-
-            // اهتزاز الشاشة
-            if (screenShake > 0) screenShake *= 0.85;
-            if (screenShake < 0.1) screenShake = 0;
-
-            // السقوط = موت
-            if (doodler.y > BASE_HEIGHT + 30) {
                 gameOver();
             }
-
-            // حفظ أعلى نتيجة فوراً
-            const intScore = Math.floor(score);
-            if (intScore > highScore) {
-                highScore = intScore;
-                localStorage.setItem('doodleJumpHighScore', highScore);
-            }
         }
 
-        function gameOver() {
-            gameState = STATE.OVER;
-            sfxDeath();
-            comboCount = 0;
-            screenShake = 15;
-            spawnParticles(doodler.x + doodler.width/2, BASE_HEIGHT, '#ff0000', 30);
+        // حفظ أعلى نتيجة
+        const intScore = Math.floor(score);
+        if (intScore > highScore) {
+            highScore = intScore;
+            localStorage.setItem('dj_highScore', highScore);
         }
 
-        function resetGame() {
-            gameState = STATE.PLAYING;
-            score = 0;
-            comboCount = 0;
-            maxCombo = 0;
-            difficultyLevel = 1;
-            doodler.x = 180;
-            doodler.y = 300;
-            doodler.dx = 0;
-            doodler.dy = 0;
-            doodler.gravity = 0.45;
-            doodler.speed = 5.5;
-            doodler.facingRight = true;
-            particles = [];
-            stars = [];
-            collectibleStars = [];
-            screenShake = 0;
-            createPlatforms();
-            initAudio();
-        }
+        // إنجازات النقاط
+        if (intScore >= 500) unlockAchievement('score_500');
+        if (intScore >= 1000) unlockAchievement('score_1000');
 
-        // ==================== الرسم ====================
-        function drawBackground() {
-            // خلفية متدرجة
-            const grad = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
-            grad.addColorStop(0, '#e8f5e9');
-            grad.addColorStop(0.5, '#f1f8e9');
-            grad.addColorStop(1, '#dcedc8');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-
-            // شبكة خفيفة
-            ctx.strokeStyle = 'rgba(0,0,0,0.04)';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < BASE_WIDTH; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, BASE_HEIGHT);
-                ctx.stroke();
-            }
-            for (let i = 0; i < BASE_HEIGHT; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(BASE_WIDTH, i);
-                ctx.stroke();
-            }
-        }
-
-        function drawParticles() {
-            particles.forEach(p => {
-                ctx.fillStyle = p.color.replace(')', `, ${p.life})`).replace('rgb', 'rgba');
-                if (p.color.startsWith('#')) {
-                    ctx.globalAlpha = p.life;
-                    ctx.fillStyle = p.color;
-                }
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-
-            stars.forEach(s => {
-                ctx.fillStyle = `rgba(255, 215, 0, ${s.life})`;
-                ctx.font = `${s.size * s.life}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.fillText('⭐', s.x, s.y);
-            });
-        }
-
-        function drawCollectibleStars() {
-            collectibleStars.forEach(s => {
-                if (s.collected) return;
-                const bob = Math.sin(Date.now() / 300 + s.bobOffset) * 4;
-                ctx.fillStyle = '#ffd700';
-                ctx.shadowColor = 'rgba(255,215,0,0.6)';
-                ctx.shadowBlur = 10;
-                ctx.font = '18px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('⭐', s.x, s.y + bob);
-                ctx.shadowBlur = 0;
-            });
-        }
-
-        function drawUI() {
-            // النقاط
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 18px "Segoe UI", Tahoma, sans-serif';
-            ctx.textAlign = 'right';
-            ctx.fillText('النقاط: ' + Math.floor(score), BASE_WIDTH - 20, 35);
-
-            // أعلى نتيجة
-            ctx.fillStyle = '#666';
-            ctx.font = '13px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('الأعلى: ' + highScore, BASE_WIDTH - 20, 55);
-
-            // التحريرة
-            if (comboCount > 1) {
-                ctx.fillStyle = '#ff6d00';
-                ctx.font = 'bold 16px "Segoe UI", Tahoma, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${comboCount}x تحريرة!`, BASE_WIDTH / 2, 80);
-            }
-
-            // المستوى
-            ctx.fillStyle = '#888';
-            ctx.font = '11px "Segoe UI", Tahoma, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('المستوى: ' + difficultyLevel, 15, 30);
-        }
-
-        function drawStartScreen() {
-            drawBackground();
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 36px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('🏆 Doodle Jump', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 60);
-
-            ctx.font = '18px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('لعبة القفز الاحترافية', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 15);
-
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 22px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('اضغط Enter أو المس الشاشة', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 50);
-            ctx.fillText('للبدء', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 80);
-
-            if (highScore > 0) {
-                ctx.fillStyle = '#ccc';
-                ctx.font = '16px "Segoe UI", Tahoma, sans-serif';
-                ctx.fillText('أعلى نتيجة: ' + highScore, BASE_WIDTH / 2, BASE_HEIGHT / 2 + 120);
-            }
-
-            ctx.fillStyle = '#aaa';
-            ctx.font = '12px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('🎮 الأسهم للتحكم | 📱 أزرار اللمس', BASE_WIDTH / 2, BASE_HEIGHT - 30);
-        }
-
-        function drawGameOverScreen() {
-            ctx.fillStyle = 'rgba(0,0,0,0.75)';
-            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 34px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('انتهت اللعبة!', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 45);
-
-            ctx.font = '20px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('النقاط: ' + Math.floor(score), BASE_WIDTH / 2, BASE_HEIGHT / 2);
-
-            ctx.fillStyle = '#ffd700';
-            ctx.font = '16px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('أعلى تحريرة: ' + maxCombo + 'x', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 30);
-
-            if (Math.floor(score) >= highScore && highScore > 0) {
-                ctx.fillStyle = '#ffd700';
-                ctx.font = 'bold 22px "Segoe UI", Tahoma, sans-serif';
-                ctx.fillText('🎉 رقم قياسي جديد! 🎉', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 65);
-            }
-
-            ctx.fillStyle = 'white';
-            ctx.font = '18px "Segoe UI", Tahoma, sans-serif';
-            ctx.fillText('اضغط Enter أو المس للإعادة', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 105);
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-
-            // اهتزاز الشاشة
-            ctx.save();
-            if (screenShake > 0.2) {
-                const sx = (Math.random() - 0.5) * screenShake;
-                const sy = (Math.random() - 0.5) * screenShake;
-                ctx.translate(sx, sy);
-            }
-
-            if (gameState === STATE.START) {
-                drawStartScreen();
-                ctx.restore();
-                return;
-            }
-
-            drawBackground();
-            platforms.forEach(p => drawPlatform(p));
-            drawCollectibleStars();
-            drawDoodler();
-            drawParticles();
-            drawUI();
-
-            ctx.restore();
-
-            if (gameState === STATE.OVER) {
-                drawGameOverScreen();
-            }
-        }
-
-        // ==================== حلقة اللعبة ====================
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // ==================== التحكم ====================
-        const keys = {};
-        document.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-            initAudio();
-
-            if (e.key === 'ArrowLeft') {
-                doodler.dx = -doodler.speed;
-                e.preventDefault();
-            } else if (e.key === 'ArrowRight') {
-                doodler.dx = doodler.speed;
-                e.preventDefault();
-            }
-
-            if ((e.key === 'Enter' || e.key === ' ') && gameState !== STATE.PLAYING) {
-                resetGame();
+        // مهام
+        missions.forEach(m => {
+            if (m.done) return;
+            const val = missionProgress[m.key] || 0;
+            m.progress = Math.min(val, m.target);
+            if (val >= m.target) {
+                m.done = true;
+                score += m.reward;
+                showToast(`✅ مهمة مكتملة! +${m.reward}`);
+                sfx.achieve();
             }
         });
+    }
 
-        document.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-            if (!keys['ArrowLeft'] && !keys['ArrowRight']) {
-                doodler.dx = 0;
-            } else if (keys['ArrowLeft']) {
-                doodler.dx = -doodler.speed;
-            } else if (keys['ArrowRight']) {
-                doodler.dx = doodler.speed;
-            }
-        });
+    function gameOver() {
+        gameState = STATE.OVER;
+        sfx.death();
+        comboCount = 0;
+        screenShake = 18;
+        spawnParticles(doodler.x + 23, BASE_HEIGHT - 20, '#ff1744', 40);
+        gamesPlayed++;
+        localStorage.setItem('dj_games', gamesPlayed);
+        localStorage.setItem('dj_totalStars', totalStars);
+        if (maxCombo > maxComboEver) {
+            maxComboEver = maxCombo;
+            localStorage.setItem('dj_maxCombo', maxComboEver);
+        }
+        if (gamesPlayed >= 10) unlockAchievement('survivor');
 
-        // أزرار اللمس
-        const btnLeft = document.getElementById('btnLeft');
-        const btnRight = document.getElementById('btnRight');
+        // فتح سكينات
+        if (highScore >= 800 && !unlockedSkins.includes('gold')) {
+            unlockedSkins.push('gold');
+            localStorage.setItem('dj_skins', JSON.stringify(unlockedSkins));
+            showToast('✨ سكين ذهبي مفتوح!');
+        }
+        if (highScore >= 1500 && !unlockedSkins.includes('neon')) {
+            unlockedSkins.push('neon');
+            localStorage.setItem('dj_skins', JSON.stringify(unlockedSkins));
+            showToast('✨ سكين نيون مفتوح!');
+        }
+        pauseBtn.style.display = 'none';
+    }
 
-        btnLeft.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            initAudio();
-            doodler.dx = -doodler.speed;
-            if (gameState !== STATE.PLAYING) resetGame();
-        });
-        btnLeft.addEventListener('pointerup', () => { if (doodler.dx < 0) doodler.dx = 0; });
-        btnLeft.addEventListener('pointerleave', () => { if (doodler.dx < 0) doodler.dx = 0; });
-
-        btnRight.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            initAudio();
-            doodler.dx = doodler.speed;
-            if (gameState !== STATE.PLAYING) resetGame();
-        });
-        btnRight.addEventListener('pointerup', () => { if (doodler.dx > 0) doodler.dx = 0; });
-        btnRight.addEventListener('pointerleave', () => { if (doodler.dx > 0) doodler.dx = 0; });
-
-        // لمس الشاشة نفسها
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            initAudio();
-            if (gameState !== STATE.PLAYING) {
-                resetGame();
-                return;
-            }
-            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-            doodler.dx = touchX < BASE_WIDTH * scale / 2 ? -doodler.speed : doodler.speed;
-        });
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (gameState !== STATE.PLAYING) return;
-            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-            doodler.dx = touchX < BASE_WIDTH * scale / 2 ? -doodler.speed : doodler.speed;
-        });
-        canvas.addEventListener('touchend', () => { doodler.dx = 0; });
-
-        canvas.addEventListener('click', () => {
-            initAudio();
-            if (gameState !== STATE.PLAYING) resetGame();
-        });
-
-        // منع السحب والتمرير
-        document.addEventListener('touchmove', (e) => {
-            if (e.target.closest('.game-wrapper')) e.preventDefault();
-        }, { passive: false });
-
-        // ==================== بدء التشغيل ====================
+    function resetGame() {
+        gameState = STATE.PLAYING;
+        isPaused = false;
+        score = 0;
+        comboCount = 0;
+        maxCombo = 0;
+        starsCollected = 0;
+        difficultyLevel = 1;
+        doodler.x = 180;
+        doodler.y = 320;
+        doodler.dx = 0;
+        doodler.dy = 0;
+        doodler.gravity = 0.42;
+        doodler.speed = 5.8;
+        doodler.facingRight = true;
+        doodler.trail = [];
+        particles = [];
+        floatingTexts = [];
+        collectibles = [];
+        activePower = null;
+        screenShake = 0;
         createPlatforms();
-        gameLoop();
+        generateMissions();
+        initAudio();
+        unlockAchievement('first_jump');
+        pauseBtn.style.display = 'flex';
+        pauseBtn.textContent = '⏸';
+    }
 
-        console.log('🚀 لعبة Doodle Jump الاحترافية جاهزة!');
-        console.log('📱 دعم كامل للجوال | 🎵 مؤثرات صوتية | 🌟 5 أنواع منصات');
-        console.log('💾 حفظ أعلى نتيجة | ✨ جزيئات وتأثيرات بصرية');
-    })();
+    // ==================== الرسم ====================
+    function drawBackground() {
+        const grad = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        grad.addColorStop(0, '#e8f5e9');
+        grad.addColorStop(0.4, '#f1f8e9');
+        grad.addColorStop(1, '#c8e6c9');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // شبكة خفيفة
+        ctx.strokeStyle = 'rgba(0,0,0,0.035)';
+        ctx.lineWidth = 0.6;
+        for (let i = 0; i < BASE_WIDTH; i += 25) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, BASE_HEIGHT); ctx.stroke();
+        }
+        for (let i = 0; i < BASE_HEIGHT; i += 25) {
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(BASE_WIDTH, i); ctx.stroke();
+        }
+    }
+
+    function drawCollectibles() {
+        collectibles.forEach(c => {
+            if (c.collected) return;
+            const bob = Math.sin(Date.now() / 280 + c.bob) * 5;
+            ctx.save();
+            if (c.type === 'star') {
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = 'rgba(255,215,0,0.7)';
+                ctx.shadowBlur = 12;
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⭐', c.x, c.y + bob);
+            } else {
+                const icons = { shield: '🛡️', magnet: '🧲', double: '💫' };
+                ctx.font = '22px Arial';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(150,100,255,0.6)';
+                ctx.shadowBlur = 14;
+                ctx.fillText(icons[c.type], c.x, c.y + bob);
+            }
+            ctx.restore();
+        });
+    }
+
+    function drawParticles() {
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+
+        floatingTexts.forEach(t => {
+            ctx.globalAlpha = t.life;
+            ctx.fillStyle = t.color;
+            ctx.font = 'bold 16px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillText(t.text, t.x, t.y);
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    function drawUI() {
+        // النقاط
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        roundRect(BASE_WIDTH - 130, 12, 115, 52, 12);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 17px "Segoe UI"';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.floor(score), BASE_WIDTH - 22, 35);
+        ctx.font = '11px "Segoe UI"';
+        ctx.fillStyle = '#aaa';
+        ctx.fillText('النقاط', BASE_WIDTH - 22, 52);
+
+        // أعلى نتيجة
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        roundRect(12, 12, 100, 28, 10);
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '12px "Segoe UI"';
+        ctx.textAlign = 'left';
+        ctx.fillText('🏆 ' + highScore, 22, 31);
+
+        // التحريرة
+        if (comboCount > 1) {
+            ctx.fillStyle = 'rgba(255,80,0,0.85)';
+            roundRect(BASE_WIDTH/2 - 55, 70, 110, 28, 14);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 15px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${comboCount}× تحريرة`, BASE_WIDTH/2, 90);
+        }
+
+        // المستوى
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        roundRect(12, 48, 70, 24, 8);
+        ctx.fillStyle = '#81c784';
+        ctx.font = '11px "Segoe UI"';
+        ctx.textAlign = 'left';
+        ctx.fillText('Lv.' + difficultyLevel, 22, 64);
+
+        // الطاقة النشطة
+        if (activePower) {
+            const names = { shield: '🛡️ درع', magnet: '🧲 مغناطيس', double: '💫 ضعف' };
+            ctx.fillStyle = 'rgba(100,50,200,0.75)';
+            roundRect(BASE_WIDTH/2 - 60, BASE_HEIGHT - 40, 120, 28, 14);
+            ctx.fillStyle = '#fff';
+            ctx.font = '13px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillText(names[activePower.type] + ' ' + Math.ceil(activePower.timer/60) + 's', BASE_WIDTH/2, BASE_HEIGHT - 21);
+        }
+
+        // المهام (مصغرة)
+        if (missions.length && gameState === STATE.PLAYING) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            roundRect(10, BASE_HEIGHT - 95, 160, 50, 10);
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px "Segoe UI"';
+            ctx.textAlign = 'left';
+            missions.forEach((m, i) => {
+                const col = m.done ? '#69f0ae' : '#eee';
+                ctx.fillStyle = col;
+                ctx.fillText((m.done ? '✓ ' : '') + m.text, 18, BASE_HEIGHT - 75 + i * 18);
+            });
+        }
+    }
+
+    function drawStartScreen() {
+        drawBackground();
+        ctx.fillStyle = 'rgba(15,12,41,0.78)';
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // عنوان
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 34px "Segoe UI"';
+        ctx.fillText('🏆 Doodle Jump Pro', BASE_WIDTH/2, 160);
+
+        ctx.font = '16px "Segoe UI"';
+        ctx.fillStyle = '#b0bec5';
+        ctx.fillText('النسخة الاحترافية المحفّزة', BASE_WIDTH/2, 195);
+
+        // إحصائيات
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        roundRect(50, 230, 300, 110, 16);
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 18px "Segoe UI"';
+        ctx.fillText('أعلى نتيجة: ' + highScore, BASE_WIDTH/2, 265);
+        ctx.fillStyle = '#81c784';
+        ctx.font = '14px "Segoe UI"';
+        ctx.fillText(`⭐ نجوم: ${totalStars}  |  🔥 أفضل تحريرة: ${maxComboEver}×`, BASE_WIDTH/2, 295);
+        ctx.fillStyle = '#90caf9';
+        ctx.fillText(`جولات: ${gamesPlayed}  |  إنجازات: ${achievements.length}`, BASE_WIDTH/2, 320);
+
+        // زر البدء
+        ctx.fillStyle = 'linear-gradient(90deg, #00c853, #64dd17)';
+        const btnGrad = ctx.createLinearGradient(100, 370, 300, 370);
+        btnGrad.addColorStop(0, '#00c853');
+        btnGrad.addColorStop(1, '#76ff03');
+        ctx.fillStyle = btnGrad;
+        roundRect(90, 360, 220, 52, 26);
+        ctx.fillStyle = '#111';
+        ctx.font = 'bold 20px "Segoe UI"';
+        ctx.fillText('ابدأ اللعب ▶', BASE_WIDTH/2, 394);
+
+        ctx.fillStyle = '#aaa';
+        ctx.font = '13px "Segoe UI"';
+        ctx.fillText('Enter أو المس الشاشة للبدء', BASE_WIDTH/2, 440);
+        ctx.fillText('🎮 أسهم ← →  |  📱 أزرار اللمس', BASE_WIDTH/2, 470);
+
+        // سكينات
+        if (unlockedSkins.length > 1) {
+            ctx.fillStyle = '#ce93d8';
+            ctx.font = '12px "Segoe UI"';
+            ctx.fillText('السكينات المفتوحة: ' + unlockedSkins.join(' • '), BASE_WIDTH/2, 520);
+        }
+    }
+
+    function drawGameOverScreen() {
+        ctx.fillStyle = 'rgba(10,8,30,0.82)';
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 32px "Segoe UI"';
+        ctx.fillText('انتهت الجولة!', BASE_WIDTH/2, 180);
+
+        ctx.font = '22px "Segoe UI"';
+        ctx.fillText(Math.floor(score) + ' نقطة', BASE_WIDTH/2, 230);
+
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '16px "Segoe UI"';
+        ctx.fillText(`أفضل تحريرة: ${maxCombo}×  |  نجوم: ${starsCollected}`, BASE_WIDTH/2, 265);
+
+        if (Math.floor(score) >= highScore && highScore > 0) {
+            ctx.fillStyle = '#ffeb3b';
+            ctx.font = 'bold 20px "Segoe UI"';
+            ctx.fillText('🎉 رقم قياسي جديد! 🎉', BASE_WIDTH/2, 310);
+        }
+
+        // زر إعادة
+        const btnGrad = ctx.createLinearGradient(100, 360, 300, 360);
+        btnGrad.addColorStop(0, '#ff6d00');
+        btnGrad.addColorStop(1, '#ff3d00');
+        ctx.fillStyle = btnGrad;
+        roundRect(90, 350, 220, 52, 26);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px "Segoe UI"';
+        ctx.fillText('العب مرة أخرى', BASE_WIDTH/2, 384);
+
+        ctx.fillStyle = '#aaa';
+        ctx.font = '13px "Segoe UI"';
+        ctx.fillText('Enter أو المس للإعادة', BASE_WIDTH/2, 430);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        ctx.save();
+        if (screenShake > 0.3) {
+            ctx.translate((Math.random()-0.5)*screenShake, (Math.random()-0.5)*screenShake);
+        }
+
+        if (gameState === STATE.START) {
+            drawStartScreen();
+            ctx.restore();
+            return;
+        }
+
+        drawBackground();
+        platforms.forEach(drawPlatform);
+        drawCollectibles();
+        drawDoodler();
+        drawParticles();
+        drawUI();
+
+        if (isPaused) {
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 28px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillText('⏸ متوقف', BASE_WIDTH/2, BASE_HEIGHT/2);
+        }
+
+        ctx.restore();
+
+        if (gameState === STATE.OVER) drawGameOverScreen();
+    }
+
+    // ==================== حلقة اللعبة ====================
+    function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ==================== التحكم ====================
+    const keys = {};
+    document.addEventListener('keydown', e => {
+        keys[e.key] = true;
+        initAudio();
+        if (e.key === 'ArrowLeft') { doodler.dx = -doodler.speed; e.preventDefault(); }
+        if (e.key === 'ArrowRight') { doodler.dx = doodler.speed; e.preventDefault(); }
+        if ((e.key === 'Enter' || e.key === ' ') && gameState !== STATE.PLAYING) resetGame();
+        if (e.key === 'p' || e.key === 'P') togglePause();
+    });
+    document.addEventListener('keyup', e => {
+        keys[e.key] = false;
+        if (!keys['ArrowLeft'] && !keys['ArrowRight']) doodler.dx = 0;
+        else if (keys['ArrowLeft']) doodler.dx = -doodler.speed;
+        else if (keys['ArrowRight']) doodler.dx = doodler.speed;
+    });
+
+    function togglePause() {
+        if (gameState !== STATE.PLAYING) return;
+        isPaused = !isPaused;
+        pauseBtn.textContent = isPaused ? '▶' : '⏸';
+    }
+    pauseBtn.addEventListener('click', togglePause);
+
+    // أزرار اللمس
+    const btnLeft = document.getElementById('btnLeft');
+    const btnRight = document.getElementById('btnRight');
+
+    function bindBtn(btn, dir) {
+        btn.addEventListener('pointerdown', e => {
+            e.preventDefault();
+            initAudio();
+            doodler.dx = dir * doodler.speed;
+            if (gameState !== STATE.PLAYING) resetGame();
+        });
+        btn.addEventListener('pointerup', () => { if (Math.sign(doodler.dx) === dir) doodler.dx = 0; });
+        btn.addEventListener('pointerleave', () => { if (Math.sign(doodler.dx) === dir) doodler.dx = 0; });
+    }
+    bindBtn(btnLeft, -1);
+    bindBtn(btnRight, 1);
+
+    // لمس الشاشة
+    canvas.addEventListener('touchstart', e => {
+        e.preventDefault();
+        initAudio();
+        if (gameState !== STATE.PLAYING) { resetGame(); return; }
+        const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+        doodler.dx = touchX < (BASE_WIDTH * scale)/2 ? -doodler.speed : doodler.speed;
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (gameState !== STATE.PLAYING) return;
+        const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+        doodler.dx = touchX < (BASE_WIDTH * scale)/2 ? -doodler.speed : doodler.speed;
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => doodler.dx = 0);
+
+    canvas.addEventListener('click', () => {
+        initAudio();
+        if (gameState !== STATE.PLAYING) resetGame();
+    });
+
+    document.addEventListener('touchmove', e => {
+        if (e.target.closest('.game-wrapper')) e.preventDefault();
+    }, { passive: false });
+
+    // بدء
+    createPlatforms();
+    gameLoop();
+
+    console.log('%c🚀 Doodle Jump Pro جاهزة!', 'color:#00e676;font-size:16px;font-weight:bold');
+    console.log('ميزات: طاقات • إنجازات • مهام • سكينات • تحريرة • حفظ تقدم');
+})();
 </script>
 </body>
 </html>
