@@ -209,7 +209,6 @@
     let particles = [];
     let floatingTexts = [];
     let screenShake = 0;
-    let powerUps = [];
     let activePower = null; // { type, timer }
     let missions = [];
     let missionProgress = {};
@@ -304,7 +303,7 @@
     // ==================== المهام اليومية ====================
     function generateMissions() {
         const pool = [
-            { id: 'collect_stars', text: 'اجمع 15 نجمة', target: 15, reward: 'stars', reward: 50 },
+            { id: 'collect_stars', text: 'اجمع 15 نجمة', target: 15, key: 'stars', reward: 50 },
             { id: 'reach_score', text: 'وصل إلى 400 نقطة', target: 400, key: 'score', reward: 80 },
             { id: 'combo_mission', text: 'احصل على تحريرة 8×', target: 8, key: 'combo', reward: 60 },
             { id: 'use_springs', text: 'استخدم 8 ينابيع', target: 8, key: 'springs', reward: 40 }
@@ -314,7 +313,6 @@
         const shuffled = pool.sort(() => Math.random() - 0.5);
         missions.push({ ...shuffled[0], progress: 0, done: false });
         missions.push({ ...shuffled[1], progress: 0, done: false });
-        missionProgress = { stars: 0, score: 0, combo: 0, springs: 0 };
     }
 
     // ==================== نظام الصوت ====================
@@ -680,7 +678,7 @@
                     addFloatingText(BASE_WIDTH/2, 120, `${comboCount}x COMBO!`, '#ff6d00');
                 }
 
-                // تحقق من المهام
+                // تحديث تقدم المهام (الكومبو)
                 if (comboCount > (missionProgress.combo || 0)) missionProgress.combo = comboCount;
 
                 return;
@@ -729,7 +727,6 @@
     function update() {
         if (gameState !== STATE.PLAYING || isPaused) return;
 
-        // الجاذبية والسرعة
         doodler.dy += doodler.gravity;
         doodler.x += doodler.dx;
         doodler.y += doodler.dy;
@@ -738,7 +735,6 @@
         doodler.gravity = 0.42 + difficultyLevel * 0.018;
         doodler.speed = 5.8 + difficultyLevel * 0.25;
 
-        // التفاف
         if (doodler.x + doodler.width < -5) doodler.x = BASE_WIDTH;
         if (doodler.x > BASE_WIDTH + 5) doodler.x = -doodler.width;
 
@@ -749,7 +745,7 @@
         checkCollectibles();
         updatePlatforms();
 
-        // الطاقة
+        // طاقة محدودة المدة
         if (activePower) {
             activePower.timer--;
             if (activePower.timer <= 0) {
@@ -758,29 +754,26 @@
             }
         }
 
-        // مضاعف النقاط
-        if (activePower && activePower.type === 'double') {
-            // يتم تطبيقه عند جمع النجوم والنقاط
-        }
-
-        // الجزيئات والنصوص
+        // الجزيئات والنصوص العائمة
         particles.forEach(p => {
-            p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= p.decay;
         });
         particles = particles.filter(p => p.life > 0);
 
         floatingTexts.forEach(t => {
-            t.y += t.vy; t.life -= 0.02;
+            t.y += t.vy;
+            t.life -= 0.02;
         });
         floatingTexts = floatingTexts.filter(t => t.life > 0);
 
         if (screenShake > 0) screenShake *= 0.82;
         if (screenShake < 0.15) screenShake = 0;
 
-        // الموت
+        // درع الحماية من الموت
         if (doodler.y > BASE_HEIGHT + 40) {
             if (activePower && activePower.type === 'shield') {
-                // إنقاذ بالدرع
                 doodler.y = BASE_HEIGHT - 80;
                 doodler.dy = -12;
                 activePower = null;
@@ -792,18 +785,16 @@
             }
         }
 
-        // حفظ أعلى نتيجة
         const intScore = Math.floor(score);
         if (intScore > highScore) {
             highScore = intScore;
             localStorage.setItem('dj_highScore', highScore);
         }
 
-        // إنجازات النقاط
         if (intScore >= 500) unlockAchievement('score_500');
         if (intScore >= 1000) unlockAchievement('score_1000');
 
-        // مهام
+        // مهام الجولة
         missions.forEach(m => {
             if (m.done) return;
             const val = missionProgress[m.key] || 0;
@@ -832,7 +823,6 @@
         }
         if (gamesPlayed >= 10) unlockAchievement('survivor');
 
-        // فتح سكينات
         if (highScore >= 800 && !unlockedSkins.includes('gold')) {
             unlockedSkins.push('gold');
             localStorage.setItem('dj_skins', JSON.stringify(unlockedSkins));
@@ -867,6 +857,7 @@
         collectibles = [];
         activePower = null;
         screenShake = 0;
+        missionProgress = { stars: 0, score: 0, combo: 0, springs: 0 };
         createPlatforms();
         generateMissions();
         initAudio();
@@ -884,7 +875,6 @@
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
 
-        // شبكة خفيفة
         ctx.strokeStyle = 'rgba(0,0,0,0.035)';
         ctx.lineWidth = 0.6;
         for (let i = 0; i < BASE_WIDTH; i += 25) {
@@ -940,7 +930,6 @@
     }
 
     function drawUI() {
-        // النقاط
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         roundRect(BASE_WIDTH - 130, 12, 115, 52, 12);
         ctx.fillStyle = '#fff';
@@ -951,7 +940,6 @@
         ctx.fillStyle = '#aaa';
         ctx.fillText('النقاط', BASE_WIDTH - 22, 52);
 
-        // أعلى نتيجة
         ctx.fillStyle = 'rgba(0,0,0,0.4)';
         roundRect(12, 12, 100, 28, 10);
         ctx.fillStyle = '#ffd700';
@@ -959,7 +947,6 @@
         ctx.textAlign = 'left';
         ctx.fillText('🏆 ' + highScore, 22, 31);
 
-        // التحريرة
         if (comboCount > 1) {
             ctx.fillStyle = 'rgba(255,80,0,0.85)';
             roundRect(BASE_WIDTH/2 - 55, 70, 110, 28, 14);
@@ -969,7 +956,6 @@
             ctx.fillText(`${comboCount}× تحريرة`, BASE_WIDTH/2, 90);
         }
 
-        // المستوى
         ctx.fillStyle = 'rgba(0,0,0,0.35)';
         roundRect(12, 48, 70, 24, 8);
         ctx.fillStyle = '#81c784';
@@ -977,7 +963,6 @@
         ctx.textAlign = 'left';
         ctx.fillText('Lv.' + difficultyLevel, 22, 64);
 
-        // الطاقة النشطة
         if (activePower) {
             const names = { shield: '🛡️ درع', magnet: '🧲 مغناطيس', double: '💫 ضعف' };
             ctx.fillStyle = 'rgba(100,50,200,0.75)';
@@ -988,7 +973,6 @@
             ctx.fillText(names[activePower.type] + ' ' + Math.ceil(activePower.timer/60) + 's', BASE_WIDTH/2, BASE_HEIGHT - 21);
         }
 
-        // المهام (مصغرة)
         if (missions.length && gameState === STATE.PLAYING) {
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             roundRect(10, BASE_HEIGHT - 95, 160, 50, 10);
@@ -1008,7 +992,6 @@
         ctx.fillStyle = 'rgba(15,12,41,0.78)';
         ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
 
-        // عنوان
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
         ctx.font = 'bold 34px "Segoe UI"';
@@ -1018,7 +1001,6 @@
         ctx.fillStyle = '#b0bec5';
         ctx.fillText('النسخة الاحترافية المحفّزة', BASE_WIDTH/2, 195);
 
-        // إحصائيات
         ctx.fillStyle = 'rgba(255,255,255,0.1)';
         roundRect(50, 230, 300, 110, 16);
         ctx.fillStyle = '#ffd700';
@@ -1030,8 +1012,6 @@
         ctx.fillStyle = '#90caf9';
         ctx.fillText(`جولات: ${gamesPlayed}  |  إنجازات: ${achievements.length}`, BASE_WIDTH/2, 320);
 
-        // زر البدء
-        ctx.fillStyle = 'linear-gradient(90deg, #00c853, #64dd17)';
         const btnGrad = ctx.createLinearGradient(100, 370, 300, 370);
         btnGrad.addColorStop(0, '#00c853');
         btnGrad.addColorStop(1, '#76ff03');
@@ -1046,7 +1026,6 @@
         ctx.fillText('Enter أو المس الشاشة للبدء', BASE_WIDTH/2, 440);
         ctx.fillText('🎮 أسهم ← →  |  📱 أزرار اللمس', BASE_WIDTH/2, 470);
 
-        // سكينات
         if (unlockedSkins.length > 1) {
             ctx.fillStyle = '#ce93d8';
             ctx.font = '12px "Segoe UI"';
@@ -1076,7 +1055,6 @@
             ctx.fillText('🎉 رقم قياسي جديد! 🎉', BASE_WIDTH/2, 310);
         }
 
-        // زر إعادة
         const btnGrad = ctx.createLinearGradient(100, 360, 300, 360);
         btnGrad.addColorStop(0, '#ff6d00');
         btnGrad.addColorStop(1, '#ff3d00');
@@ -1174,7 +1152,6 @@
     bindBtn(btnLeft, -1);
     bindBtn(btnRight, 1);
 
-    // لمس الشاشة
     canvas.addEventListener('touchstart', e => {
         e.preventDefault();
         initAudio();
