@@ -2,206 +2,932 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة القفز (Doodle Jump)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Doodle Jump - لعبة القفز الاحترافية</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #1a1a2e;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #2c3e50; /* لون خلفية الصفحة */
-            font-family: Tahoma, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        .game-wrapper {
+            position: relative;
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0,200,100,0.3), 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
         canvas {
-            background-color: #f1f1d4; /* لون خلفية اللعبة الكلاسيكي */
-            background-image: linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
-            background-size: 20px 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: block;
+            border-radius: 16px;
+        }
+        .mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .ctrl-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .ctrl-btn:active {
+            background: rgba(255,255,255,0.5);
+            transform: scale(0.9);
+        }
+        @media (max-width: 600px) {
+            .mobile-controls {
+                display: flex;
+            }
+            canvas {
+                border-radius: 0;
+            }
+            .game-wrapper {
+                border-radius: 0;
+                width: 100vw;
+                height: 100vh;
+            }
         }
     </style>
 </head>
 <body>
 
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+<div class="game-wrapper" id="gameWrapper">
+    <canvas id="gameCanvas"></canvas>
+    <div class="mobile-controls">
+        <button class="ctrl-btn" id="btnLeft">◀</button>
+        <button class="ctrl-btn" id="btnRight">▶</button>
+    </div>
+</div>
 
 <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    (function() {
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('gameWrapper');
 
-    let isGameOver = false;
-    let score = 0;
+        // حجم ديناميكي يتكيف مع الشاشة
+        const BASE_WIDTH = 400;
+        const BASE_HEIGHT = 600;
+        let scale = 1;
 
-    // إعدادات اللاعب (الكائن الفضائي)
-    const doodler = {
-        x: 180,
-        y: 300,
-        width: 40,
-        height: 40,
-        dx: 0,
-        dy: 0,
-        gravity: 0.4,
-        jumpStrength: -10,
-        speed: 5
-    };
-
-    let platforms = [];
-    const platformWidth = 65;
-    const platformHeight = 12;
-
-    // توليد المنصات الأولى
-    function createPlatforms() {
-        platforms = [];
-        platforms.push({ x: doodler.x, y: doodler.y + 80 }); 
-        for (let i = 0; i < 7; i++) {
-            let x = Math.random() * (canvas.width - platformWidth);
-            let y = canvas.height - 80 * i - 100;
-            platforms.push({ x, y });
+        function resizeCanvas() {
+            const maxWidth = Math.min(window.innerWidth, 500);
+            const maxHeight = Math.min(window.innerHeight, 800);
+            scale = Math.min(maxWidth / BASE_WIDTH, maxHeight / BASE_HEIGHT);
+            canvas.width = BASE_WIDTH;
+            canvas.height = BASE_HEIGHT;
+            canvas.style.width = BASE_WIDTH * scale + 'px';
+            canvas.style.height = BASE_HEIGHT * scale + 'px';
         }
-    }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-    // رسم اللاعب (شكل مبسط يشبه الصورة)
-    function drawDoodler() {
-        ctx.fillStyle = '#b3c100'; // اللون الأخضر المصفر
-        ctx.beginPath();
-        ctx.roundRect(doodler.x, doodler.y, doodler.width, doodler.height, 10);
-        ctx.fill();
-        
-        // العيون
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(doodler.x + 12, doodler.y + 15, 3, 0, Math.PI * 2);
-        ctx.arc(doodler.x + 28, doodler.y + 15, 3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // الأنف الفضائي
-        ctx.fillRect(doodler.x + 35, doodler.y + 20, 15, 6);
-    }
+        // ==================== حالة اللعبة ====================
+        const STATE = {
+            START: 'start',
+            PLAYING: 'playing',
+            OVER: 'over'
+        };
+        let gameState = STATE.START;
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('doodleJumpHighScore')) || 0;
+        let comboCount = 0;
+        let maxCombo = 0;
+        let particles = [];
+        let stars = [];
+        let screenShake = 0;
+        let difficultyLevel = 1;
 
-    // رسم المنصات
-    function drawPlatforms() {
-        ctx.fillStyle = '#55a630';
-        platforms.forEach(p => {
+        // ==================== اللاعب ====================
+        const doodler = {
+            x: 180,
+            y: 300,
+            width: 44,
+            height: 44,
+            dx: 0,
+            dy: 0,
+            gravity: 0.45,
+            jumpStrength: -10.5,
+            speed: 5.5,
+            facingRight: true,
+            eyeBlinkTimer: 0,
+            trailPositions: []
+        };
+
+        // ==================== المنصات ====================
+        const PLATFORM_TYPES = {
+            NORMAL: 'normal',
+            MOVING: 'moving',
+            SPRING: 'spring',
+            BREAKING: 'breaking',
+            CLOUD: 'cloud'
+        };
+
+        let platforms = [];
+        const platformWidth = 68;
+        const platformHeight = 14;
+
+        function createPlatform(x, y, type = PLATFORM_TYPES.NORMAL) {
+            return {
+                x: x,
+                y: y,
+                width: platformWidth,
+                height: platformHeight,
+                type: type,
+                dx: (Math.random() - 0.5) * 2.5,
+                moveRange: 60 + Math.random() * 40,
+                originX: x,
+                broken: false,
+                springBounce: -15,
+                alpha: 1
+            };
+        }
+
+        function createPlatforms() {
+            platforms = [];
+            // منصة البداية تحت اللاعب
+            platforms.push(createPlatform(doodler.x - 10, doodler.y + 70, PLATFORM_TYPES.NORMAL));
+
+            for (let i = 1; i < 8; i++) {
+                let x = Math.random() * (BASE_WIDTH - platformWidth);
+                let y = BASE_HEIGHT - 85 * i - 50;
+                let type = PLATFORM_TYPES.NORMAL;
+
+                // توزيع أنواع المنصات
+                const rand = Math.random();
+                if (i > 2 && rand < 0.15) type = PLATFORM_TYPES.SPRING;
+                else if (i > 2 && rand < 0.35) type = PLATFORM_TYPES.MOVING;
+                else if (i > 3 && rand < 0.50) type = PLATFORM_TYPES.BREAKING;
+                else if (i > 4 && rand < 0.60) type = PLATFORM_TYPES.CLOUD;
+
+                platforms.push(createPlatform(x, y, type));
+            }
+        }
+
+        // ==================== نظام الصوت ====================
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(freq, type, duration, vol = 0.1, glideTo = null) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                if (glideTo) osc.frequency.linearRampToValueAtTime(glideTo, audioCtx.currentTime + duration);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function sfxJump() { playSound(300, 'square', 0.1, 0.08, 600); }
+        function sfxSpring() { playSound(200, 'square', 0.15, 0.06, 800); setTimeout(() => playSound(400, 'square', 0.1, 0.06, 900), 60); }
+        function sfxBreak() { playSound(80, 'sawtooth', 0.15, 0.12, 40); }
+        function sfxCoin() { playSound(800, 'square', 0.08, 0.06, 1200); }
+        function sfxDeath() { playSound(60, 'sawtooth', 0.3, 0.3, 30); }
+        function sfxCombo() { playSound(500, 'square', 0.12, 0.08, 1000); }
+
+        // ==================== الجزيئات ====================
+        function spawnParticles(x, y, color, count = 12) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5 - 2,
+                    life: 1,
+                    decay: 0.02 + Math.random() * 0.04,
+                    size: 2 + Math.random() * 4,
+                    color: color
+                });
+            }
+        }
+
+        function spawnStars(x, y) {
+            const count = 3 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: x + (Math.random() - 0.5) * 40,
+                    y: y - Math.random() * 20,
+                    vy: -3 - Math.random() * 4,
+                    life: 1,
+                    decay: 0.03,
+                    size: 6 + Math.random() * 8
+                });
+            }
+        }
+
+        // ==================== النجوم القابلة للتجميع ====================
+        let collectibleStars = [];
+        function spawnCollectibleStar(x, y) {
+            if (Math.random() < 0.4) {
+                collectibleStars.push({
+                    x: x + platformWidth / 2,
+                    y: y - 25,
+                    radius: 10,
+                    collected: false,
+                    bobOffset: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        // ==================== رسم محسن مع roundRect آمن ====================
+        function roundRect(x, y, w, h, r) {
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, r);
+                ctx.fill();
+            } else {
+                // fallback يدوي
+                r = Math.min(r, w/2, h/2);
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function drawDoodler() {
+            const { x, y, width, height, facingRight } = doodler;
+            ctx.save();
+            const cx = x + width / 2;
+            const cy = y + height / 2;
+
+            // تأثير الظل
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 3;
+
+            // الجسم
+            const bodyGrad = ctx.createLinearGradient(x, y, x, y + height);
+            bodyGrad.addColorStop(0, '#c8e600');
+            bodyGrad.addColorStop(0.5, '#a8c200');
+            bodyGrad.addColorStop(1, '#7a8c00');
+            ctx.fillStyle = bodyGrad;
+            roundRect(x, y, width, height, 12);
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+            // خطوط الجسم
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.roundRect(p.x, p.y, platformWidth, platformHeight, 5);
-            ctx.fill();
-        });
-    }
+            ctx.roundRect(x + 2, y + 2, width - 4, height - 4, 10);
+            ctx.stroke();
 
-    // تحريك المنصات للأسفل عند صعود اللاعب
-    function updatePlatforms() {
-        if (doodler.y < canvas.height / 2) {
-            doodler.y = canvas.height / 2; 
-            platforms.forEach(p => {
-                p.y -= doodler.dy;
-            });
-            score += 0.1; 
-        }
-
-        if (platforms[0].y > canvas.height) {
-            platforms.shift(); 
-            let x = Math.random() * (canvas.width - platformWidth);
-            let y = platforms[platforms.length - 1].y - 80;
-            platforms.push({ x, y });
-        }
-    }
-
-    // حلقة اللعبة الرئيسية
-    function update() {
-        if (isGameOver) {
-            // شاشة الخسارة
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // العيون
+            const eyeY = y + 14;
+            // بياض العين
             ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 30px Tahoma';
-            ctx.fillText('انتهت اللعبة!', canvas.width / 2, canvas.height / 2 - 20);
-            ctx.font = '20px Tahoma';
-            ctx.fillText('النقاط: ' + Math.floor(score), canvas.width / 2, canvas.height / 2 + 20);
-            ctx.fillText('اضغط Enter للإعادة', canvas.width / 2, canvas.height / 2 + 60);
-            return;
+            ctx.beginPath();
+            ctx.arc(x + 14, eyeY, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 30, eyeY, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // بؤبؤ العين (يتحرك قليلاً مع الاتجاه)
+            const pupilOffset = facingRight ? 2 : -2;
+            ctx.fillStyle = '#111';
+            ctx.beginPath();
+            ctx.arc(x + 14 + pupilOffset, eyeY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 30 + pupilOffset, eyeY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // لمعة العين
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(x + 12 + pupilOffset, eyeY - 2, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 28 + pupilOffset, eyeY - 2, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // الأنف (يغير اتجاهه)
+            ctx.fillStyle = '#5c7a00';
+            if (facingRight) {
+                ctx.fillRect(x + 36, y + 20, 18, 7);
+                ctx.fillRect(x + 50, y + 17, 6, 13);
+            } else {
+                ctx.fillRect(x - 10, y + 20, 18, 7);
+                ctx.fillRect(x - 12, y + 17, 6, 13);
+            }
+
+            // ابتسامة
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(x + width/2, y + 28, 8, 0.1, Math.PI - 0.1);
+            ctx.stroke();
+
+            ctx.restore();
         }
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function drawPlatform(p) {
+            if (p.broken) return;
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
 
-        // الجاذبية والحركة
-        doodler.dy += doodler.gravity;
-        doodler.x += doodler.dx;
-        doodler.y += doodler.dy;
+            switch (p.type) {
+                case PLATFORM_TYPES.NORMAL:
+                    ctx.fillStyle = '#4caf50';
+                    ctx.shadowColor = 'rgba(0,0,0,0.25)';
+                    ctx.shadowBlur = 6;
+                    ctx.shadowOffsetY = 2;
+                    roundRect(p.x, p.y, p.width, p.height, 7);
+                    // لمسة علوية
+                    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                    roundRect(p.x + 3, p.y + 1, p.width - 6, p.height/3, 4);
+                    break;
 
-        // الخروج من يمين الشاشة والظهور من اليسار (والعكس)
-        if (doodler.x + doodler.width < 0) doodler.x = canvas.width;
-        if (doodler.x > canvas.width) doodler.x = -doodler.width;
+                case PLATFORM_TYPES.MOVING:
+                    const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+                    grad.addColorStop(0, '#7c4dff');
+                    grad.addColorStop(1, '#651fff');
+                    ctx.fillStyle = grad;
+                    ctx.shadowColor = 'rgba(100,50,255,0.4)';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowOffsetY = 2;
+                    roundRect(p.x, p.y, p.width, p.height, 7);
+                    // أسهم الاتجاه
+                    ctx.fillStyle = 'white';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('↔', p.x + p.width/2, p.y + p.height - 3);
+                    break;
 
-        // التصادم مع المنصات (يحدث فقط أثناء النزول)
-        if (doodler.dy > 0) {
+                case PLATFORM_TYPES.SPRING:
+                    ctx.fillStyle = '#ff9800';
+                    ctx.shadowColor = 'rgba(255,150,0,0.5)';
+                    ctx.shadowBlur = 12;
+                    roundRect(p.x, p.y, p.width, p.height, 7);
+                    ctx.fillStyle = '#ffcc02';
+                    roundRect(p.x + 10, p.y - 8, p.width - 20, 10, 4);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('⬆', p.x + p.width/2, p.y + p.height - 2);
+                    break;
+
+                case PLATFORM_TYPES.BREAKING:
+                    ctx.fillStyle = '#f44336';
+                    ctx.shadowColor = 'rgba(244,67,54,0.4)';
+                    ctx.shadowBlur = 8;
+                    roundRect(p.x, p.y, p.width, p.height, 7);
+                    // شقوق
+                    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x + 10, p.y + 3);
+                    ctx.lineTo(p.x + 25, p.y + p.height - 3);
+                    ctx.moveTo(p.x + 35, p.y + 2);
+                    ctx.lineTo(p.x + 45, p.y + p.height - 4);
+                    ctx.stroke();
+                    break;
+
+                case PLATFORM_TYPES.CLOUD:
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.shadowColor = 'rgba(255,255,255,0.3)';
+                    ctx.shadowBlur = 15;
+                    roundRect(p.x, p.y, p.width, p.height, 20);
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.beginPath();
+                    ctx.arc(p.x + 15, p.y, 18, 0, Math.PI*2);
+                    ctx.arc(p.x + p.width/2, p.y - 5, 22, 0, Math.PI*2);
+                    ctx.arc(p.x + p.width - 15, p.y, 18, 0, Math.PI*2);
+                    ctx.fill();
+                    break;
+            }
+
+            ctx.restore();
+        }
+
+        // ==================== تحديث المنصات ====================
+        function updatePlatforms() {
+            // تحريك المنصات للأسفل
+            if (doodler.y < BASE_HEIGHT / 2 && doodler.dy < 0) {
+                const offset = -doodler.dy;
+                doodler.y = BASE_HEIGHT / 2;
+                platforms.forEach(p => { p.y += offset; p.originX += offset * 0; });
+                collectibleStars.forEach(s => s.y += offset);
+                score += Math.abs(offset) * 0.15;
+            }
+
+            // إزالة المنصات الخارجة من الأسفل
+            while (platforms.length > 0 && platforms[0].y > BASE_HEIGHT + 50) {
+                platforms.shift();
+            }
+
+            // إضافة منصات جديدة من الأعلى
+            while (platforms.length < 8) {
+                const lastY = platforms.length > 0 ? platforms[platforms.length - 1].y : BASE_HEIGHT;
+                const x = Math.random() * (BASE_WIDTH - platformWidth);
+                const y = lastY - 70 - Math.random() * 30;
+                let type = PLATFORM_TYPES.NORMAL;
+                const rand = Math.random();
+                if (difficultyLevel > 2 && rand < 0.2) type = PLATFORM_TYPES.SPRING;
+                else if (difficultyLevel > 1 && rand < 0.35) type = PLATFORM_TYPES.MOVING;
+                else if (difficultyLevel > 2 && rand < 0.5) type = PLATFORM_TYPES.BREAKING;
+                else if (difficultyLevel > 3 && rand < 0.6) type = PLATFORM_TYPES.CLOUD;
+
+                const newPlat = createPlatform(x, y, type);
+                platforms.push(newPlat);
+                spawnCollectibleStar(x, y);
+            }
+
+            // تحديث المنصات المتحركة
             platforms.forEach(p => {
-                if (
-                    doodler.x < p.x + platformWidth &&
-                    doodler.x + doodler.width > p.x &&
-                    doodler.y + doodler.height > p.y &&
-                    doodler.y + doodler.height < p.y + platformHeight + doodler.dy
-                ) {
-                    doodler.dy = doodler.jumpStrength; // تفعيل القفز
+                if (p.type === PLATFORM_TYPES.MOVING && !p.broken) {
+                    p.x += p.dx;
+                    if (p.x > p.originX + p.moveRange || p.x < p.originX - p.moveRange) {
+                        p.dx *= -1;
+                    }
+                }
+                // منصة السحاب تختفي ببطء
+                if (p.type === PLATFORM_TYPES.CLOUD && p.broken) {
+                    p.alpha -= 0.05;
                 }
             });
+
+            // تحديث النجوم
+            collectibleStars = collectibleStars.filter(s => !s.collected && s.y < BASE_HEIGHT + 50);
         }
 
-        // التحقق من السقوط (الخسارة)
-        if (doodler.y > canvas.height) {
-            isGameOver = true;
+        // ==================== التصادم ====================
+        function checkCollision() {
+            if (doodler.dy <= 0) return; // فقط أثناء النزول
+
+            for (let p of platforms) {
+                if (p.broken && p.type === PLATFORM_TYPES.BREAKING) continue;
+                if (p.broken && p.type === PLATFORM_TYPES.CLOUD) continue;
+
+                const doodlerBottom = doodler.y + doodler.height;
+                const doodlerLeft = doodler.x;
+                const doodlerRight = doodler.x + doodler.width;
+
+                if (
+                    doodlerRight > p.x &&
+                    doodlerLeft < p.x + p.width &&
+                    doodlerBottom > p.y &&
+                    doodlerBottom < p.y + p.height + Math.abs(doodler.dy) + 2
+                ) {
+                    // اصطدام!
+                    if (p.type === PLATFORM_TYPES.SPRING) {
+                        doodler.dy = p.springBounce;
+                        sfxSpring();
+                        spawnParticles(doodler.x + doodler.width/2, doodler.y + doodler.height, '#ff9800', 20);
+                        screenShake = 8;
+                        // ضغط الزنبرك بصرياً
+                        p.y += 5;
+                        setTimeout(() => { if (p) p.y -= 5; }, 150);
+                    } else if (p.type === PLATFORM_TYPES.BREAKING) {
+                        p.broken = true;
+                        doodler.dy = doodler.jumpStrength * 0.8;
+                        sfxBreak();
+                        spawnParticles(p.x + p.width/2, p.y + p.height/2, '#f44336', 18);
+                        screenShake = 5;
+                        comboCount = 0;
+                    } else if (p.type === PLATFORM_TYPES.CLOUD) {
+                        p.broken = true;
+                        doodler.dy = doodler.jumpStrength * 1.1;
+                        sfxJump();
+                        spawnParticles(doodler.x + doodler.width/2, doodler.y + doodler.height, '#ffffff', 8);
+                        comboCount++;
+                    } else {
+                        doodler.dy = doodler.jumpStrength;
+                        sfxJump();
+                        spawnParticles(doodler.x + doodler.width/2, doodler.y + doodler.height, '#4caf50', 8);
+                        comboCount++;
+                    }
+
+                    if (comboCount > maxCombo) maxCombo = comboCount;
+                    if (comboCount > 0 && comboCount % 5 === 0) {
+                        sfxCombo();
+                        spawnStars(doodler.x + doodler.width/2, doodler.y);
+                    }
+
+                    // تجميع نجمة قريبة
+                    collectibleStars.forEach(s => {
+                        if (!s.collected && Math.abs(s.x - doodler.x - doodler.width/2) < 30 && Math.abs(s.y - doodler.y) < 40) {
+                            s.collected = true;
+                            score += 10;
+                            sfxCoin();
+                            spawnParticles(s.x, s.y, '#ffd700', 15);
+                        }
+                    });
+
+                    return;
+                }
+            }
         }
 
-        updatePlatforms();
-        drawPlatforms();
-        drawDoodler();
+        // ==================== تحديث عام ====================
+        function update() {
+            if (gameState !== STATE.PLAYING) return;
 
-        // رسم عداد النقاط
-        ctx.fillStyle = '#333';
-        ctx.font = 'bold 20px Tahoma';
-        ctx.textAlign = 'right';
-        ctx.fillText('النقاط: ' + Math.floor(score), canvas.width - 20, 30);
+            // الجاذبية
+            doodler.dy += doodler.gravity;
+            doodler.x += doodler.dx;
+            doodler.y += doodler.dy;
 
-        requestAnimationFrame(update);
-    }
+            // صعوبة تدريجية
+            difficultyLevel = 1 + Math.floor(score / 100);
+            doodler.gravity = 0.45 + difficultyLevel * 0.02;
+            doodler.speed = 5.5 + difficultyLevel * 0.3;
 
-    // التحكم بالأسهم
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
+            // الالتفاف حول الشاشة
+            if (doodler.x + doodler.width < -10) doodler.x = BASE_WIDTH;
+            if (doodler.x > BASE_WIDTH + 10) doodler.x = -doodler.width;
+
+            // اتجاه اللاعب
+            if (doodler.dx > 0.2) doodler.facingRight = true;
+            if (doodler.dx < -0.2) doodler.facingRight = false;
+
+            checkCollision();
+            updatePlatforms();
+
+            // تحديث الجزيئات
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+            });
+            particles = particles.filter(p => p.life > 0);
+
+            // تحديث النجوم الطائرة
+            stars.forEach(s => {
+                s.y += s.vy;
+                s.life -= s.decay;
+            });
+            stars = stars.filter(s => s.life > 0);
+
+            // اهتزاز الشاشة
+            if (screenShake > 0) screenShake *= 0.85;
+            if (screenShake < 0.1) screenShake = 0;
+
+            // السقوط = موت
+            if (doodler.y > BASE_HEIGHT + 30) {
+                gameOver();
+            }
+
+            // حفظ أعلى نتيجة فوراً
+            const intScore = Math.floor(score);
+            if (intScore > highScore) {
+                highScore = intScore;
+                localStorage.setItem('doodleJumpHighScore', highScore);
+            }
+        }
+
+        function gameOver() {
+            gameState = STATE.OVER;
+            sfxDeath();
+            comboCount = 0;
+            screenShake = 15;
+            spawnParticles(doodler.x + doodler.width/2, BASE_HEIGHT, '#ff0000', 30);
+        }
+
+        function resetGame() {
+            gameState = STATE.PLAYING;
+            score = 0;
+            comboCount = 0;
+            maxCombo = 0;
+            difficultyLevel = 1;
+            doodler.x = 180;
+            doodler.y = 300;
+            doodler.dx = 0;
+            doodler.dy = 0;
+            doodler.gravity = 0.45;
+            doodler.speed = 5.5;
+            doodler.facingRight = true;
+            particles = [];
+            stars = [];
+            collectibleStars = [];
+            screenShake = 0;
+            createPlatforms();
+            initAudio();
+        }
+
+        // ==================== الرسم ====================
+        function drawBackground() {
+            // خلفية متدرجة
+            const grad = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+            grad.addColorStop(0, '#e8f5e9');
+            grad.addColorStop(0.5, '#f1f8e9');
+            grad.addColorStop(1, '#dcedc8');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+            // شبكة خفيفة
+            ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < BASE_WIDTH; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, BASE_HEIGHT);
+                ctx.stroke();
+            }
+            for (let i = 0; i < BASE_HEIGHT; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(BASE_WIDTH, i);
+                ctx.stroke();
+            }
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.fillStyle = p.color.replace(')', `, ${p.life})`).replace('rgb', 'rgba');
+                if (p.color.startsWith('#')) {
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            stars.forEach(s => {
+                ctx.fillStyle = `rgba(255, 215, 0, ${s.life})`;
+                ctx.font = `${s.size * s.life}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillText('⭐', s.x, s.y);
+            });
+        }
+
+        function drawCollectibleStars() {
+            collectibleStars.forEach(s => {
+                if (s.collected) return;
+                const bob = Math.sin(Date.now() / 300 + s.bobOffset) * 4;
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = 'rgba(255,215,0,0.6)';
+                ctx.shadowBlur = 10;
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⭐', s.x, s.y + bob);
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        function drawUI() {
+            // النقاط
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px "Segoe UI", Tahoma, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText('النقاط: ' + Math.floor(score), BASE_WIDTH - 20, 35);
+
+            // أعلى نتيجة
+            ctx.fillStyle = '#666';
+            ctx.font = '13px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('الأعلى: ' + highScore, BASE_WIDTH - 20, 55);
+
+            // التحريرة
+            if (comboCount > 1) {
+                ctx.fillStyle = '#ff6d00';
+                ctx.font = 'bold 16px "Segoe UI", Tahoma, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${comboCount}x تحريرة!`, BASE_WIDTH / 2, 80);
+            }
+
+            // المستوى
+            ctx.fillStyle = '#888';
+            ctx.font = '11px "Segoe UI", Tahoma, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('المستوى: ' + difficultyLevel, 15, 30);
+        }
+
+        function drawStartScreen() {
+            drawBackground();
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 36px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('🏆 Doodle Jump', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 60);
+
+            ctx.font = '18px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('لعبة القفز الاحترافية', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 15);
+
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 22px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('اضغط Enter أو المس الشاشة', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 50);
+            ctx.fillText('للبدء', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 80);
+
+            if (highScore > 0) {
+                ctx.fillStyle = '#ccc';
+                ctx.font = '16px "Segoe UI", Tahoma, sans-serif';
+                ctx.fillText('أعلى نتيجة: ' + highScore, BASE_WIDTH / 2, BASE_HEIGHT / 2 + 120);
+            }
+
+            ctx.fillStyle = '#aaa';
+            ctx.font = '12px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('🎮 الأسهم للتحكم | 📱 أزرار اللمس', BASE_WIDTH / 2, BASE_HEIGHT - 30);
+        }
+
+        function drawGameOverScreen() {
+            ctx.fillStyle = 'rgba(0,0,0,0.75)';
+            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 34px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('انتهت اللعبة!', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 45);
+
+            ctx.font = '20px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('النقاط: ' + Math.floor(score), BASE_WIDTH / 2, BASE_HEIGHT / 2);
+
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '16px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('أعلى تحريرة: ' + maxCombo + 'x', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 30);
+
+            if (Math.floor(score) >= highScore && highScore > 0) {
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 22px "Segoe UI", Tahoma, sans-serif';
+                ctx.fillText('🎉 رقم قياسي جديد! 🎉', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 65);
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.font = '18px "Segoe UI", Tahoma, sans-serif';
+            ctx.fillText('اضغط Enter أو المس للإعادة', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 105);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+            // اهتزاز الشاشة
+            ctx.save();
+            if (screenShake > 0.2) {
+                const sx = (Math.random() - 0.5) * screenShake;
+                const sy = (Math.random() - 0.5) * screenShake;
+                ctx.translate(sx, sy);
+            }
+
+            if (gameState === STATE.START) {
+                drawStartScreen();
+                ctx.restore();
+                return;
+            }
+
+            drawBackground();
+            platforms.forEach(p => drawPlatform(p));
+            drawCollectibleStars();
+            drawDoodler();
+            drawParticles();
+            drawUI();
+
+            ctx.restore();
+
+            if (gameState === STATE.OVER) {
+                drawGameOverScreen();
+            }
+        }
+
+        // ==================== حلقة اللعبة ====================
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== التحكم ====================
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            initAudio();
+
+            if (e.key === 'ArrowLeft') {
+                doodler.dx = -doodler.speed;
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                doodler.dx = doodler.speed;
+                e.preventDefault();
+            }
+
+            if ((e.key === 'Enter' || e.key === ' ') && gameState !== STATE.PLAYING) {
+                resetGame();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+            if (!keys['ArrowLeft'] && !keys['ArrowRight']) {
+                doodler.dx = 0;
+            } else if (keys['ArrowLeft']) {
+                doodler.dx = -doodler.speed;
+            } else if (keys['ArrowRight']) {
+                doodler.dx = doodler.speed;
+            }
+        });
+
+        // أزرار اللمس
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+
+        btnLeft.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            initAudio();
             doodler.dx = -doodler.speed;
-        } else if (e.key === 'ArrowRight') {
+            if (gameState !== STATE.PLAYING) resetGame();
+        });
+        btnLeft.addEventListener('pointerup', () => { if (doodler.dx < 0) doodler.dx = 0; });
+        btnLeft.addEventListener('pointerleave', () => { if (doodler.dx < 0) doodler.dx = 0; });
+
+        btnRight.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            initAudio();
             doodler.dx = doodler.speed;
-        }
-        
-        if (isGameOver && e.key === 'Enter') {
-            resetGame();
-        }
-    });
+            if (gameState !== STATE.PLAYING) resetGame();
+        });
+        btnRight.addEventListener('pointerup', () => { if (doodler.dx > 0) doodler.dx = 0; });
+        btnRight.addEventListener('pointerleave', () => { if (doodler.dx > 0) doodler.dx = 0; });
 
-    document.addEventListener('keyup', (e) => {
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            doodler.dx = 0; // إيقاف الحركة عند رفع الإصبع عن السهم
-        }
-    });
+        // لمس الشاشة نفسها
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initAudio();
+            if (gameState !== STATE.PLAYING) {
+                resetGame();
+                return;
+            }
+            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+            doodler.dx = touchX < BASE_WIDTH * scale / 2 ? -doodler.speed : doodler.speed;
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (gameState !== STATE.PLAYING) return;
+            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+            doodler.dx = touchX < BASE_WIDTH * scale / 2 ? -doodler.speed : doodler.speed;
+        });
+        canvas.addEventListener('touchend', () => { doodler.dx = 0; });
 
-    function resetGame() {
-        isGameOver = false;
-        score = 0;
-        doodler.x = 180;
-        doodler.y = 300;
-        doodler.dy = 0;
-        doodler.dx = 0;
+        canvas.addEventListener('click', () => {
+            initAudio();
+            if (gameState !== STATE.PLAYING) resetGame();
+        });
+
+        // منع السحب والتمرير
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('.game-wrapper')) e.preventDefault();
+        }, { passive: false });
+
+        // ==================== بدء التشغيل ====================
         createPlatforms();
-        requestAnimationFrame(update);
-    }
+        gameLoop();
 
-    // بدء اللعبة لأول مرة
-    createPlatforms();
-    update();
-
+        console.log('🚀 لعبة Doodle Jump الاحترافية جاهزة!');
+        console.log('📱 دعم كامل للجوال | 🎵 مؤثرات صوتية | 🌟 5 أنواع منصات');
+        console.log('💾 حفظ أعلى نتيجة | ✨ جزيئات وتأثيرات بصرية');
+    })();
 </script>
 </body>
 </html>
