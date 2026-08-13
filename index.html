@@ -1,611 +1,1879 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Doodle Jump Pro - منصة حمراء محسّنة</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .game-wrapper {
-            position: relative;
-            border-radius: 24px;
-            box-shadow: 0 0 60px rgba(0, 255, 150, 0.3), 0 25px 80px rgba(0,0,0,0.7);
-            overflow: hidden;
-            background: #111;
-        }
-        canvas {
-            display: block;
-            border-radius: 24px;
-        }
-        .mobile-controls {
-            display: none;
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            padding: 0 20px;
-            justify-content: space-between;
-            pointer-events: none;
-            z-index: 20;
-        }
-        .ctrl-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(255,255,255,0.3);
-            color: white;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: auto;
-            cursor: pointer;
-            transition: all 0.1s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
-        .ctrl-btn:active {
-            background: rgba(255,255,255,0.5);
-            transform: scale(0.85);
-        }
-        @media (max-width: 600px) {
-            .mobile-controls { display: flex; }
-            canvas, .game-wrapper { border-radius: 0; }
-            .game-wrapper { width: 100vw; height: 100vh; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>متجري PRO 2.0</title>
+
+<style>
+:root{
+  --primary:#6c4df6;
+  --dark:#151523;
+  --bg:#f5f6fa;
+  --card:#fff;
+  --line:#e8e8f0;
+  --text:#171725;
+  --muted:#73758a;
+  --green:#16a34a;
+  --red:#dc2626;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,Tahoma,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+button,input,select,textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+  border:0;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.container{
+  width:min(1200px,94%);
+  margin:auto;
+}
+
+/* LOGIN */
+
+.login{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:linear-gradient(135deg,#151523,#6c4df6);
+}
+
+.loginbox{
+  background:#fff;
+  width:min(430px,100%);
+  padding:32px;
+  border-radius:25px;
+  box-shadow:0 25px 70px #0004;
+}
+
+.logo{
+  font-size:27px;
+  font-weight:900;
+  color:var(--primary);
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.logo span{
+  color:#171725;
+}
+
+.loginbox p{
+  text-align:center;
+  color:var(--muted);
+}
+
+.form{
+  display:grid;
+  gap:12px;
+}
+
+.form input,
+.form select,
+.form textarea{
+  width:100%;
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  outline:0;
+  background:#fff;
+}
+
+.form textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.btn{
+  padding:12px 17px;
+  border-radius:11px;
+  font-weight:800;
+}
+
+.primary{
+  background:var(--primary);
+  color:#fff;
+}
+
+.green{
+  background:var(--green);
+  color:#fff;
+}
+
+.danger{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.light{
+  background:#f1f0ff;
+  color:var(--primary);
+}
+
+.hint{
+  font-size:12px;
+  background:#f7f7fb;
+  padding:10px;
+  border-radius:10px;
+  color:#666;
+  margin-top:12px;
+}
+
+/* HEADER */
+
+.top{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.topbar{
+  height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.topbar .logo{
+  margin:0;
+  text-align:right;
+  font-size:22px;
+}
+
+.user{
+  display:flex;
+  gap:9px;
+  align-items:center;
+}
+
+.avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:#ece9ff;
+  display:grid;
+  place-items:center;
+}
+
+/* LAYOUT */
+
+.layout{
+  display:grid;
+  grid-template-columns:230px 1fr;
+  gap:20px;
+  padding:22px 0;
+}
+
+.side{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:12px;
+  height:max-content;
+  position:sticky;
+  top:90px;
+}
+
+.navbtn{
+  width:100%;
+  text-align:right;
+  padding:12px;
+  border-radius:10px;
+  background:transparent;
+  margin:2px 0;
+}
+
+.navbtn.active,
+.navbtn:hover{
+  background:#f0eeff;
+  color:var(--primary);
+  font-weight:800;
+}
+
+.main h1{
+  margin:0;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin:20px 0;
+}
+
+.stat{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:18px;
+}
+
+.stat b{
+  font-size:26px;
+  display:block;
+  margin-top:7px;
+}
+
+/* PANEL */
+
+.panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.panelhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+/* TABLE */
+
+.tablewrap{
+  overflow:auto;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+.table th,
+.table td{
+  padding:12px;
+  border-bottom:1px solid var(--line);
+  text-align:right;
+}
+
+.status{
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.pending{
+  background:#fff7ed;
+  color:#c2410c;
+}
+
+.confirmed{
+  background:#eff6ff;
+  color:#1d4ed8;
+}
+
+.shipped{
+  background:#f5f3ff;
+  color:#6d28d9;
+}
+
+.done{
+  background:#ecfdf3;
+  color:#15803d;
+}
+
+.cancelled{
+  background:#fef2f2;
+  color:#b91c1c;
+}
+
+/* PRODUCTS */
+
+.productgrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.prod{
+  border:1px solid var(--line);
+  border-radius:15px;
+  overflow:hidden;
+  background:#fff;
+}
+
+.prodimg{
+  height:150px;
+  background:#f0efff;
+  display:grid;
+  place-items:center;
+  font-size:65px;
+}
+
+.prodbody{
+  padding:13px;
+}
+
+.actions{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
+}
+
+/* MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#0007;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:50;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modalbox{
+  background:#fff;
+  width:min(600px,100%);
+  max-height:92vh;
+  overflow:auto;
+  border-radius:20px;
+  padding:22px;
+}
+
+.close{
+  float:left;
+  background:#eee;
+  border-radius:9px;
+  padding:7px 11px;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:#171725;
+  color:#fff;
+  padding:12px 18px;
+  border-radius:12px;
+  display:none;
+  z-index:100;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+  .side{
+    position:static;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .productgrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:550px){
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .productgrid{
+    grid-template-columns:1fr;
+  }
+
+  .topbar{
+    height:auto;
+    padding:12px 0;
+  }
+
+  .topbar .logo{
+    font-size:19px;
+  }
+
+}
+</style>
 </head>
+
 <body>
-<div class="game-wrapper" id="gameWrapper">
-    <canvas id="gameCanvas"></canvas>
-    <div class="mobile-controls">
-        <button class="ctrl-btn" id="btnLeft">◀</button>
-        <button class="ctrl-btn" id="btnRight">▶</button>
-    </div>
+
+<!-- LOGIN -->
+
+<section id="loginPage" class="login">
+
+<div class="loginbox">
+
+<div class="logo">
+متجري <span>PRO 2.0</span>
 </div>
 
+<p>تسجيل دخول لوحة الإدارة</p>
+
+<form class="form" onsubmit="login(event)">
+
+<input
+id="email"
+type="email"
+placeholder="البريد الإلكتروني"
+required
+>
+
+<input
+id="password"
+type="password"
+placeholder="كلمة المرور"
+required
+>
+
+<button class="btn primary">
+دخول لوحة التحكم
+</button>
+
+</form>
+
+<div class="hint">
+
+البريد التجريبي:
+<b>admin@store.com</b>
+
+<br><br>
+
+كلمة المرور:
+<b>123456</b>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- APPLICATION -->
+
+<section id="app" class="hidden">
+
+<header class="top">
+
+<div class="container topbar">
+
+<div class="logo">
+متجري <span>PRO 2.0</span>
+</div>
+
+<div class="user">
+
+<div>
+<b>المدير</b>
+<br>
+<small class="muted">لوحة التحكم</small>
+</div>
+
+<div class="avatar">
+👤
+</div>
+
+<button class="btn light" onclick="logout()">
+خروج
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<div class="container layout">
+
+<!-- SIDEBAR -->
+
+<aside class="side">
+
+<button
+class="navbtn active"
+onclick="showSection('dashboard',this)"
+>
+📊 الرئيسية
+</button>
+
+<button
+class="navbtn"
+onclick="showSection('products',this)"
+>
+🛍️ المنتجات
+</button>
+
+<button
+class="navbtn"
+onclick="showSection('orders',this)"
+>
+📦 الطلبات
+</button>
+
+<button
+class="navbtn"
+onclick="showSection('settings',this)"
+>
+⚙️ الإعدادات
+</button>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+
+<!-- DASHBOARD -->
+
+<section id="dashboard">
+
+<h1>
+لوحة التحكم
+</h1>
+
+<p class="muted">
+نظرة سريعة على متجرك.
+</p>
+
+
+<div class="stats">
+
+<div class="stat">
+
+عدد المنتجات
+
+<b id="statProducts">
+0
+</b>
+
+</div>
+
+
+<div class="stat">
+
+عدد الطلبات
+
+<b id="statOrders">
+0
+</b>
+
+</div>
+
+
+<div class="stat">
+
+طلبات قيد المعالجة
+
+<b id="statPending">
+0
+</b>
+
+</div>
+
+
+<div class="stat">
+
+إجمالي المبيعات
+
+<b id="statSales">
+$0
+</b>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div class="panelhead">
+
+<h2>
+آخر الطلبات
+</h2>
+
+<button
+class="btn light"
+onclick="showSection('orders')"
+>
+عرض الكل
+</button>
+
+</div>
+
+<div id="recentOrders"></div>
+
+</div>
+
+</section>
+
+
+<!-- PRODUCTS -->
+
+<section id="products" class="hidden">
+
+<div class="panelhead">
+
+<div>
+
+<h1>
+المنتجات
+</h1>
+
+<span class="muted">
+أضف وعدّل منتجات متجرك.
+</span>
+
+</div>
+
+<button
+class="btn primary"
+onclick="openProduct()"
+>
++ إضافة منتج
+</button>
+
+</div>
+
+
+<div class="panel">
+
+<div
+class="productgrid"
+id="productGrid"
+></div>
+
+</div>
+
+</section>
+
+
+<!-- ORDERS -->
+
+<section id="orders" class="hidden">
+
+<div class="panelhead">
+
+<div>
+
+<h1>
+إدارة الطلبات
+</h1>
+
+<span class="muted">
+تابع الطلبات وغيّر حالتها.
+</span>
+
+</div>
+
+
+<select
+id="orderFilter"
+class="btn light"
+onchange="renderOrders()"
+>
+
+<option value="all">
+كل الحالات
+</option>
+
+<option value="pending">
+قيد المراجعة
+</option>
+
+<option value="confirmed">
+مؤكد
+</option>
+
+<option value="shipped">
+تم الشحن
+</option>
+
+<option value="done">
+مكتمل
+</option>
+
+<option value="cancelled">
+ملغي
+</option>
+
+</select>
+
+</div>
+
+
+<div class="panel">
+
+<div class="tablewrap">
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>
+رقم الطلب
+</th>
+
+<th>
+العميل
+</th>
+
+<th>
+التاريخ
+</th>
+
+<th>
+الإجمالي
+</th>
+
+<th>
+الحالة
+</th>
+
+<th>
+إجراء
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="ordersBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SETTINGS -->
+
+<section id="settings" class="hidden">
+
+<h1>
+الإعدادات
+</h1>
+
+<p class="muted">
+إعدادات المتجر.
+</p>
+
+
+<div class="panel form">
+
+<label>
+
+اسم المتجر
+
+<input
+id="storeName"
+value="متجري PRO"
+>
+
+</label>
+
+
+<label>
+
+رقم واتساب
+
+<input
+id="whatsapp"
+value="+964 000 000 0000"
+>
+
+</label>
+
+
+<label>
+
+عملة المتجر
+
+<select id="currency">
+
+<option value="USD">
+USD - دولار
+</option>
+
+<option value="IQD">
+IQD - دينار عراقي
+</option>
+
+</select>
+
+</label>
+
+
+<button
+class="btn primary"
+onclick="saveSettings()"
+>
+حفظ الإعدادات
+</button>
+
+</div>
+
+</section>
+
+
+</main>
+
+</div>
+
+</section>
+
+
+<!-- PRODUCT MODAL -->
+
+<div
+class="modal"
+id="productModal"
+>
+
+<div class="modalbox">
+
+<button
+class="close"
+onclick="closeProduct()"
+>
+✕
+</button>
+
+<h2 id="modalTitle">
+إضافة منتج
+</h2>
+
+
+<form
+class="form"
+onsubmit="saveProduct(event)"
+>
+
+<input
+type="hidden"
+id="pid"
+>
+
+
+<input
+id="pname"
+placeholder="اسم المنتج"
+required
+>
+
+
+<input
+id="pcat"
+placeholder="القسم"
+required
+>
+
+
+<input
+id="pprice"
+type="number"
+min="0"
+step="0.01"
+placeholder="السعر"
+required
+>
+
+
+<input
+id="pold"
+type="number"
+min="0"
+step="0.01"
+placeholder="السعر السابق"
+>
+
+
+<input
+id="pstock"
+type="number"
+min="0"
+placeholder="المخزون"
+required
+>
+
+
+<input
+id="picon"
+placeholder="رمز المنتج"
+value="📦"
+>
+
+
+<textarea
+id="pdesc"
+placeholder="وصف المنتج"
+></textarea>
+
+
+<button
+class="btn primary"
+>
+حفظ المنتج
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<div
+id="toast"
+class="toast"
+></div>
+
+
 <script>
-(function() {
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const wrapper = document.getElementById('gameWrapper');
 
-    const BASE_WIDTH = 400;
-    const BASE_HEIGHT = 650;
-    let scale = 1;
-    let isPaused = false;
+/* =========================
+   PRODUCTS
+========================= */
 
-    function resizeCanvas() {
-        const maxW = Math.min(window.innerWidth, 480);
-        const maxH = Math.min(window.innerHeight, 850);
-        scale = Math.min(maxW / BASE_WIDTH, maxH / BASE_HEIGHT);
-        canvas.width = BASE_WIDTH;
-        canvas.height = BASE_HEIGHT;
-        canvas.style.width = BASE_WIDTH * scale + 'px';
-        canvas.style.height = BASE_HEIGHT * scale + 'px';
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+const defaultProducts=[
 
-    const SCREEN = { MENU: 'menu', PLAYING: 'playing', OVER: 'over', ACHIEVEMENTS: 'achievements', SKINS: 'skins', SHOP: 'shop' };
-    let currentScreen = SCREEN.MENU;
+{
+id:1,
+name:"سماعات لاسلكية Pro",
+cat:"إلكترونيات",
+price:29,
+old:39,
+stock:25,
+icon:"🎧",
+desc:"سماعات لاسلكية بجودة ممتازة."
+},
 
-    let highScore = parseInt(localStorage.getItem('dj_highScore')) || 0;
-    let totalStars = parseInt(localStorage.getItem('dj_totalStars')) || 0;
-    let coins = parseInt(localStorage.getItem('dj_coins')) || 0;
-    let gamesPlayed = parseInt(localStorage.getItem('dj_games')) || 0;
-    let maxComboEver = parseInt(localStorage.getItem('dj_maxCombo')) || 0;
-    let unlockedSkins = JSON.parse(localStorage.getItem('dj_skins') || '["default"]');
-    let currentSkin = localStorage.getItem('dj_currentSkin') || 'default';
-    let achievements = JSON.parse(localStorage.getItem('dj_achievements') || '[]');
-    let ownedPowers = JSON.parse(localStorage.getItem('dj_powers') || '[]');
+{
+id:2,
+name:"ساعة ذكية Ultra",
+cat:"إلكترونيات",
+price:45,
+old:59,
+stock:18,
+icon:"⌚",
+desc:"ساعة ذكية للاستخدام اليومي."
+},
 
-    let score = 0;
-    let comboCount = 0;
-    let maxCombo = 0;
-    let starsCollected = 0;
-    let coinsEarned = 0;
-    let difficultyLevel = 1;
-    let particles = [];
-    let floatingTexts = [];
-    let screenShake = 0;
-    let activePower = null;
-    let missions = [];
-    let missionProgress = {};
+{
+id:3,
+name:"حقيبة ظهر عصرية",
+cat:"أزياء",
+price:24,
+old:32,
+stock:40,
+icon:"🎒",
+desc:"حقيبة عملية وعصرية."
+},
 
-    const doodler = {
-        x: 180, y: 320, width: 46, height: 46,
-        dx: 0, dy: 0, gravity: 0.42, jumpStrength: -10.8,
-        speed: 5.8, facingRight: true, trail: []
-    };
+{
+id:4,
+name:"حذاء رياضي",
+cat:"أزياء",
+price:38,
+old:49,
+stock:12,
+icon:"👟",
+desc:"حذاء رياضي مريح."
+},
 
-    const PLATFORM = { NORMAL:'normal', MOVING:'moving', SPRING:'spring', BREAKING:'breaking', CLOUD:'cloud', BOOST:'boost' };
-    let platforms = [];
-    const PW = 70, PH = 15;
+{
+id:5,
+name:"مصباح LED ذكي",
+cat:"منزل",
+price:18,
+old:25,
+stock:30,
+icon:"💡",
+desc:"إضاءة LED للمنزل."
+},
 
-    function createPlatform(x,y,type=PLATFORM.NORMAL) {
-        return { x,y, width:PW, height:PH, type, dx:(Math.random()-0.5)*2.8,
-            moveRange:55+Math.random()*50, originX:x, broken:false, alpha:1,
-            bounce: type===PLATFORM.SPRING?-16.5:(type===PLATFORM.BOOST?-14:-10.8) };
-    }
+{
+id:6,
+name:"كوب حراري",
+cat:"منزل",
+price:15,
+old:20,
+stock:35,
+icon:"🥤",
+desc:"يحافظ على حرارة المشروبات."
+}
 
-    function createPlatforms() {
-        platforms = [];
-        platforms.push(createPlatform(doodler.x-12, doodler.y+75, PLATFORM.NORMAL));
-        for(let i=1;i<9;i++) {
-            let x = Math.random()*(BASE_WIDTH-PW);
-            let y = BASE_HEIGHT - 80*i - 40;
-            platforms.push(createPlatform(x,y,getPlatformType(i)));
-        }
-    }
+];
 
-    function getPlatformType(idx) {
-        const r=Math.random(), lvl=difficultyLevel;
-        if(idx>5 && r<0.12+lvl*0.02) return PLATFORM.BOOST;
-        if(idx>3 && r<0.18+lvl*0.03) return PLATFORM.SPRING;
-        if(idx>2 && r<0.32+lvl*0.04) return PLATFORM.MOVING;
-        if(idx>4 && r<0.45+lvl*0.05) return PLATFORM.BREAKING;
-        if(idx>5 && r<0.55+lvl*0.04) return PLATFORM.CLOUD;
-        return PLATFORM.NORMAL;
-    }
 
-    const ACHIEVEMENTS = {
-        first_jump:{id:'first_jump',title:'أول قفزة!',desc:'ابدأ رحلتك',icon:'🚀'},
-        combo_5:{id:'combo_5',title:'تحريرة 5×',desc:'5 قفزات متتالية',icon:'🔥'},
-        combo_10:{id:'combo_10',title:'سيد التحريرة',desc:'10× تحريرة',icon:'💥'},
-        score_500:{id:'score_500',title:'نصف الألف',desc:'500 نقطة',icon:'⭐'},
-        score_1000:{id:'score_1000',title:'الألف الذهبية',desc:'1000 نقطة',icon:'👑'},
-        stars_20:{id:'stars_20',title:'جامع النجوم',desc:'20 نجمة بجولة',icon:'🌟'},
-        survivor:{id:'survivor',title:'الناجي',desc:'10 جولات',icon:'🛡️'},
-        spring_master:{id:'spring_master',title:'ملك الينابيع',desc:'15 زنبرك',icon:'⬆️'}
-    };
+let products=
+JSON.parse(
+localStorage.getItem("pro_products")
+)||defaultProducts;
 
-    function unlockAchievement(id) {
-        if(achievements.includes(id)) return;
-        achievements.push(id);
-        localStorage.setItem('dj_achievements', JSON.stringify(achievements));
-        coins += 50;
-        localStorage.setItem('dj_coins', coins);
-        addFloatingText(BASE_WIDTH/2, 200, '+50 🪙', '#ffd700');
-    }
 
-    function generateMissions() {
-        const pool = [
-            {id:'stars',text:'اجمع 12 نجمة',target:12,key:'stars',reward:30},
-            {id:'score',text:'وصل 350 نقطة',target:350,key:'score',reward:50},
-            {id:'combo',text:'تحريرة 6×',target:6,key:'combo',reward:40},
-            {id:'springs',text:'5 ينابيع',target:5,key:'springs',reward:20},
-            {id:'coins_mission',text:'اجمع 8 عملات',target:8,key:'coins',reward:25},
-            {id:'platforms',text:'اقفز على 25 منصة',target:25,key:'platforms',reward:35}
-        ];
-        const shuffled = pool.sort(()=>Math.random()-0.5);
-        missions = [
-            {...shuffled[0], progress:0, done:false},
-            {...shuffled[1], progress:0, done:false},
-            {...shuffled[2], progress:0, done:false}
-        ];
-    }
+let orders=
+JSON.parse(
+localStorage.getItem("pro_orders")
+)||[
 
-    let audioCtx=null;
-    function initAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();}
-    function playTone(f,t,d,v=0.09,g=null){
-        if(!audioCtx)return;
-        try{
-            const o=audioCtx.createOscillator(),gn=audioCtx.createGain();
-            o.type=t;o.frequency.setValueAtTime(f,audioCtx.currentTime);
-            if(g)o.frequency.linearRampToValueAtTime(g,audioCtx.currentTime+d);
-            gn.gain.setValueAtTime(v,audioCtx.currentTime);
-            gn.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);
-            o.connect(gn);gn.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d);
-        }catch(e){}
-    }
-    const sfx = {
-        jump:()=>playTone(280,'square',0.09,0.07,520),
-        spring:()=>{playTone(180,'square',0.14,0.08,750);setTimeout(()=>playTone(420,'square',0.1,0.07,950),70);},
-        break:()=>playTone(70,'sawtooth',0.18,0.14,35),
-        coin:()=>playTone(880,'square',0.07,0.06,1400),
-        power:()=>playTone(400,'triangle',0.2,0.1,900),
-        death:()=>playTone(50,'sawtooth',0.4,0.28,20),
-        combo:()=>playTone(600,'square',0.12,0.09,1100),
-        achieve:()=>{playTone(500,'sine',0.1,0.1,800);setTimeout(()=>playTone(800,'sine',0.15,0.1,1200),100);}
-    };
+{
+id:"ORD-1001",
+customer:"أحمد محمد",
+date:"2026-08-13",
+total:83,
+status:"pending"
+},
 
-    function spawnParticles(x,y,color,count=14,speed=4){
-        for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*speed*2,vy:(Math.random()-0.5)*speed*2-1.5,life:1,decay:0.018+Math.random()*0.03,size:2+Math.random()*5,color});
-    }
-    function addFloatingText(x,y,text,color='#ffd700'){ floatingTexts.push({x,y,text,color,life:1,vy:-1.8}); }
+{
+id:"ORD-1000",
+customer:"محمد علي",
+date:"2026-08-12",
+total:45,
+status:"confirmed"
+},
 
-    let collectibles = [];
-    function spawnCollectible(x,y){
-        const r=Math.random();
-        if(r<0.35) collectibles.push({x:x+PW/2,y:y-28,type:'star',radius:11,collected:false,bob:Math.random()*Math.PI*2});
-        else if(r<0.45) collectibles.push({x:x+PW/2,y:y-32,type:'coin',radius:10,collected:false,bob:Math.random()*Math.PI*2});
-        else if(r<0.52 && difficultyLevel>1) {
-            const types=['shield','magnet','double'];
-            collectibles.push({x:x+PW/2,y:y-32,type:types[Math.floor(Math.random()*types.length)],radius:13,collected:false,bob:Math.random()*Math.PI*2});
-        }
-    }
+{
+id:"ORD-0999",
+customer:"سارة أحمد",
+date:"2026-08-11",
+total:120,
+status:"done"
+}
 
-    function roundRect(x,y,w,h,r){
-        r=Math.min(r,w/2,h/2);
-        ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-        ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
-        ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();
-    }
+];
 
-    function drawDoodler(){
-        const {x,y,width,height,facingRight}=doodler;
-        ctx.save();
-        let grad=ctx.createLinearGradient(x,y,x,y+height);
-        if(currentSkin==='gold'){ grad.addColorStop(0,'#ffd700');grad.addColorStop(1,'#b8860b');}
-        else if(currentSkin==='neon'){ grad.addColorStop(0,'#0ff');grad.addColorStop(1,'#0af');}
-        else { grad.addColorStop(0,'#d4f000');grad.addColorStop(1,'#6a8000');}
-        ctx.fillStyle=grad;ctx.shadowColor='rgba(0,0,0,0.4)';ctx.shadowBlur=10;roundRect(x,y,width,height,14);
-        ctx.shadowColor='transparent';
-        ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+15,y+15,7.5,0,Math.PI*2);ctx.arc(x+32,y+15,7.5,0,Math.PI*2);ctx.fill();
-        const po=facingRight?2.5:-2.5;
-        ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x+15+po,y+15,3.8,0,Math.PI*2);ctx.arc(x+32+po,y+15,3.8,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+13+po,y+13,1.6,0,Math.PI*2);ctx.arc(x+30+po,y+13,1.6,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=currentSkin==='gold'?'#aa7700':'#4a6a00';
-        if(facingRight){ctx.fillRect(x+38,y+21,17,7);ctx.fillRect(x+51,y+18,6,13);}
-        else {ctx.fillRect(x-9,y+21,17,7);ctx.fillRect(x-11,y+18,6,13);}
-        ctx.restore();
-    }
 
-    function drawPlatform(p){
-        if(p.broken&&p.type!==PLATFORM.CLOUD)return;
-        ctx.save();ctx.globalAlpha=p.alpha;
-        switch(p.type){
-            case PLATFORM.NORMAL: ctx.fillStyle='#43a047';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=7;roundRect(p.x,p.y,p.width,p.height,8);break;
-            case PLATFORM.MOVING: ctx.fillStyle='#7c4dff';ctx.shadowColor='rgba(120,80,255,0.5)';ctx.shadowBlur=12;roundRect(p.x,p.y,p.width,p.height,8);break;
-            case PLATFORM.SPRING: ctx.fillStyle='#ff9800';ctx.shadowColor='rgba(255,150,0,0.6)';ctx.shadowBlur=14;roundRect(p.x,p.y,p.width,p.height,8);
-                ctx.fillStyle='#ffd54f';roundRect(p.x+12,p.y-10,p.width-24,12,5);break;
-            case PLATFORM.BREAKING: ctx.fillStyle='#e53935';ctx.shadowColor='rgba(229,57,53,0.5)';ctx.shadowBlur=9;roundRect(p.x,p.y,p.width,p.height,8);break;
-            case PLATFORM.CLOUD: ctx.fillStyle='rgba(255,255,255,0.85)';ctx.shadowColor='rgba(255,255,255,0.4)';ctx.shadowBlur=18;roundRect(p.x,p.y,p.width,p.height,22);break;
-            case PLATFORM.BOOST: ctx.fillStyle='#00e5ff';ctx.shadowColor='rgba(0,180,255,0.6)';ctx.shadowBlur=15;roundRect(p.x,p.y,p.width,p.height,8);break;
-        }
-        ctx.restore();
-    }
+/* =========================
+   STORAGE
+========================= */
 
-    function updatePlatforms(){
-        if(doodler.y<BASE_HEIGHT*0.42&&doodler.dy<0){
-            const off=-doodler.dy; doodler.y=BASE_HEIGHT*0.42;
-            platforms.forEach(p=>p.y+=off); collectibles.forEach(c=>c.y+=off);
-            score+=Math.abs(off)*0.18*(1+comboCount*0.05);
-        }
-        while(platforms.length&&platforms[0].y>BASE_HEIGHT+60) platforms.shift();
-        while(platforms.length<9){
-            const lastY=platforms.length?platforms[platforms.length-1].y:BASE_HEIGHT;
-            const x=Math.random()*(BASE_WIDTH-PW), y=lastY-(65+Math.random()*35);
-            const np=createPlatform(x,y,getPlatformType(10)); platforms.push(np); spawnCollectible(x,y);
-        }
-        platforms.forEach(p=>{ if(p.type===PLATFORM.MOVING&&!p.broken){ p.x+=p.dx; if(p.x>p.originX+p.moveRange||p.x<p.originX-p.moveRange)p.dx*=-1; } if(p.type===PLATFORM.CLOUD&&p.broken)p.alpha-=0.04; });
-        collectibles=collectibles.filter(c=>!c.collected&&c.y<BASE_HEIGHT+80);
-    }
+function persist(){
 
-    let platformsJumped = 0;
-    function checkCollision(){
-        if(doodler.dy<=0)return;
-        for(let p of platforms){
-            if(p.broken)continue;
-            const bottom=doodler.y+doodler.height;
-            if(doodler.x+doodler.width>p.x&&doodler.x<p.x+p.width&&bottom>p.y&&bottom<p.y+p.height+Math.abs(doodler.dy)+4){
-                if(p.type===PLATFORM.SPRING||p.type===PLATFORM.BOOST){ doodler.dy=p.bounce; sfx.spring(); comboCount++; missionProgress.springs=(missionProgress.springs||0)+1; }
-                else if(p.type===PLATFORM.BREAKING){
-                    // ✅ التعديل هنا: القفزة أصبحت طبيعية 100%
-                    p.broken = true;
-                    doodler.dy = doodler.jumpStrength; // كانت doodler.jumpStrength * 0.75
-                    sfx.break();
-                    comboCount = 0; // لا تزال تصفّر التحريرة (تحذير)
-                }
-                else if(p.type===PLATFORM.CLOUD){ p.broken=true; doodler.dy=doodler.jumpStrength*1.15; sfx.jump(); comboCount++; }
-                else { doodler.dy=doodler.jumpStrength; sfx.jump(); comboCount++; }
-                if(comboCount>maxCombo)maxCombo=comboCount;
-                platformsJumped++;
-                missionProgress.platforms = (missionProgress.platforms||0) + 1;
-                if(Math.random()<0.3) {
-                    coinsEarned++;
-                    coins++;
-                    addFloatingText(doodler.x+doodler.width/2, doodler.y, '+1 🪙', '#ffaa00');
-                }
-                return;
-            }
-        }
-    }
+localStorage.setItem(
+"pro_products",
+JSON.stringify(products)
+);
 
-    function checkCollectibles(){
-        collectibles.forEach(c=>{
-            if(c.collected)return;
-            const dx=(doodler.x+doodler.width/2)-c.x, dy=(doodler.y+doodler.height/2)-c.y, dist=Math.sqrt(dx*dx+dy*dy);
-            if(dist<28){
-                c.collected=true;
-                if(c.type==='star'){
-                    score+=12+comboCount; starsCollected++; totalStars++; missionProgress.stars=(missionProgress.stars||0)+1;
-                    sfx.coin(); spawnParticles(c.x,c.y,'#ffd700',16);
-                } else if(c.type==='coin'){
-                    coinsEarned++; coins++; missionProgress.coins=(missionProgress.coins||0)+1;
-                    sfx.coin(); spawnParticles(c.x,c.y,'#ffaa00',12);
-                    addFloatingText(c.x,c.y,'+1 🪙','#ffaa00');
-                } else {
-                    activePower={type:c.type,timer:300};
-                    sfx.power(); spawnParticles(c.x,c.y,'#7c4dff',20);
-                }
-            }
-        });
-    }
+localStorage.setItem(
+"pro_orders",
+JSON.stringify(orders)
+);
 
-    function update(){
-        if(currentScreen!==SCREEN.PLAYING||isPaused)return;
-        doodler.dy+=doodler.gravity; doodler.x+=doodler.dx; doodler.y+=doodler.dy;
-        difficultyLevel=1+Math.floor(score/120);
-        if(doodler.x+doodler.width<-5)doodler.x=BASE_WIDTH; if(doodler.x>BASE_WIDTH+5)doodler.x=-doodler.width;
-        if(doodler.dx>0.3)doodler.facingRight=true; if(doodler.dx<-0.3)doodler.facingRight=false;
-        checkCollision();
-        checkCollectibles();
-        updatePlatforms();
-        if(activePower){ activePower.timer--; if(activePower.timer<=0)activePower=null; }
+}
 
-        particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;}); particles=particles.filter(p=>p.life>0);
-        floatingTexts.forEach(t=>{t.y+=t.vy;t.life-=0.02;}); floatingTexts=floatingTexts.filter(t=>t.life>0);
-        if(screenShake>0)screenShake*=0.8; if(screenShake<0.1)screenShake=0;
-        if(doodler.y>BASE_HEIGHT+40) gameOver();
 
-        const intScore=Math.floor(score); if(intScore>highScore){highScore=intScore;localStorage.setItem('dj_highScore',highScore);}
-        missionProgress.score = intScore;
-        if(comboCount > (missionProgress.combo||0)) missionProgress.combo = comboCount;
-        missions.forEach(m=>{
-            if(m.done)return;
-            const val = missionProgress[m.key] || 0;
-            m.progress = Math.min(val, m.target);
-            if(val >= m.target){
-                m.done = true;
-                score += m.reward;
-                coins += m.reward/2;
-                addFloatingText(BASE_WIDTH/2, 150, '✅ مهمة! +'+m.reward+' نقاط', '#00e676');
-            }
-        });
-    }
+/* =========================
+   LOGIN
+========================= */
 
-    function gameOver(){
-        currentScreen=SCREEN.OVER; sfx.death();
-        screenShake = 10;
-        gamesPlayed++; localStorage.setItem('dj_games',gamesPlayed); localStorage.setItem('dj_totalStars',totalStars); localStorage.setItem('dj_coins',coins);
-        if(maxCombo>maxComboEver){maxComboEver=maxCombo;localStorage.setItem('dj_maxCombo',maxComboEver);}
-        if(highScore>=800&&!unlockedSkins.includes('gold')){unlockedSkins.push('gold');localStorage.setItem('dj_skins',JSON.stringify(unlockedSkins));}
-        if(highScore>=1500&&!unlockedSkins.includes('neon')){unlockedSkins.push('neon');localStorage.setItem('dj_skins',JSON.stringify(unlockedSkins));}
-    }
+function login(e){
 
-    function resetGame(){
-        currentScreen=SCREEN.PLAYING; isPaused=false;
-        score=0;comboCount=0;maxCombo=0;starsCollected=0;coinsEarned=0;difficultyLevel=1;platformsJumped=0;
-        doodler.x=180;doodler.y=320;doodler.dx=0;doodler.dy=0;doodler.gravity=0.42;doodler.speed=5.8;doodler.facingRight=true;doodler.trail=[];
-        particles=[];floatingTexts=[];collectibles=[];activePower=null;screenShake=0;
-        missionProgress={stars:0,score:0,combo:0,springs:0,coins:0,platforms:0};
-        createPlatforms();generateMissions();initAudio();unlockAchievement('first_jump');
-    }
+e.preventDefault();
 
-    function drawBackground(){
-        const grad=ctx.createLinearGradient(0,0,0,BASE_HEIGHT);grad.addColorStop(0,'#e8f5e9');grad.addColorStop(0.4,'#f1f8e9');grad.addColorStop(1,'#c8e6c9');
-        ctx.fillStyle=grad;ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-    }
+const user=
+document.getElementById("email").value;
 
-    function drawButton(x,y,w,h,text,color1,color2,textColor='white'){
-        ctx.save();ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;
-        const grad=ctx.createLinearGradient(x,y,x,y+h);grad.addColorStop(0,color1);grad.addColorStop(1,color2);
-        ctx.fillStyle=grad;roundRect(x,y,w,h,h/2);
-        ctx.shadowColor='transparent';ctx.fillStyle=textColor;ctx.font='bold 17px "Segoe UI"';ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(text,x+w/2,y+h/2);ctx.restore();
-    }
+const pass=
+document.getElementById("password").value;
 
-    function isInsideButton(mx,my,x,y,w,h){ return mx>=x&&mx<=x+w&&my>=y&&my<=y+h; }
 
-    function drawMenuScreen(){
-        drawBackground();
-        ctx.fillStyle='rgba(15,12,41,0.82)';ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-        ctx.fillStyle='white';ctx.font='bold 36px';ctx.textAlign='center';ctx.fillText('🏆 Doodle Jump',BASE_WIDTH/2,120);
-        ctx.font='18px';ctx.fillStyle='#b0bec5';ctx.fillText('Pro',BASE_WIDTH/2,155);
-        ctx.fillStyle='rgba(255,255,255,0.1)';roundRect(40,190,320,70,16);
-        ctx.fillStyle='#ffd700';ctx.font='bold 15px';ctx.fillText('🪙 عملات: '+coins,BASE_WIDTH/2,225);
-        ctx.fillStyle='#81c784';ctx.font='14px';ctx.fillText('🏆 '+highScore+' نقاط  |  ⭐ '+totalStars,BASE_WIDTH/2,250);
-        drawButton(100,290,200,50,'ابدأ اللعب ▶','#00c853','#64dd17');
-        drawButton(100,355,200,42,'🛒 المتجر','#ff9800','#f57c00');
-        drawButton(100,410,200,42,'🏆 الإنجازات','#7c4dff','#651fff');
-        drawButton(100,465,200,42,'🎨 السكينات','#e91e63','#c2185b');
-    }
+if(
+user==="admin@store.com"
+&&
+pass==="123456"
+){
 
-    function drawShopScreen(){
-        drawBackground();
-        ctx.fillStyle='rgba(15,12,41,0.85)';ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-        ctx.fillStyle='white';ctx.font='bold 26px';ctx.textAlign='center';ctx.fillText('🛒 المتجر',BASE_WIDTH/2,45);
-        ctx.fillStyle='#ffd700';ctx.font='16px';ctx.fillText('عملاتك: '+coins+' 🪙',BASE_WIDTH/2,75);
-        const items = [
-            {id:'shield_buy', name:'درع (مرة واحدة)', cost:30, desc:'ينقذك من السقوط'},
-            {id:'magnet_buy', name:'مغناطيس', cost:25, desc:'يجذب النجوم'},
-            {id:'double_buy', name:'نقاط مضاعفة', cost:40, desc:'نقاط ×2 لمدة 5 ثوان'},
-        ];
-        items.forEach((item,i)=>{
-            const y=110+i*70;
-            ctx.fillStyle='rgba(255,255,255,0.08)';roundRect(30,y,340,60,14);
-            ctx.fillStyle='white';ctx.font='16px';ctx.textAlign='left';ctx.fillText(item.name,50,y+25);
-            ctx.fillStyle='#ccc';ctx.font='12px';ctx.fillText(item.desc,50,y+45);
-            if(coins >= item.cost) drawButton(260,y+15,80,30,'شراء','#00c853','#64dd17');
-            else { ctx.fillStyle='#aaa';ctx.font='13px';ctx.textAlign='center';ctx.fillText('🔒 '+item.cost,300,y+35); }
-        });
-        drawButton(100,540,200,42,'رجوع','#546e7a','#455a64');
-    }
+sessionStorage.setItem(
+"pro_admin",
+"1"
+);
 
-    function drawAchievementsScreen(){
-        drawBackground();
-        ctx.fillStyle='rgba(15,12,41,0.85)';ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-        ctx.fillStyle='white';ctx.font='bold 24px';ctx.textAlign='center';ctx.fillText('🏆 الإنجازات',BASE_WIDTH/2,45);
-        const list=Object.values(ACHIEVEMENTS);
-        list.forEach((a,i)=>{
-            const y=80+i*55, unlocked=achievements.includes(a.id);
-            ctx.fillStyle=unlocked?'rgba(255,215,0,0.2)':'rgba(255,255,255,0.05)';
-            roundRect(30,y,340,45,12);
-            ctx.fillStyle=unlocked?'#ffd700':'#aaa';ctx.font='15px';ctx.textAlign='left';
-            ctx.fillText((unlocked?a.icon:'🔒')+' '+a.title,50,y+28);
-        });
-        drawButton(100,540,200,42,'رجوع','#546e7a','#455a64');
-    }
+showApp();
 
-    function drawSkinsScreen(){
-        drawBackground();
-        ctx.fillStyle='rgba(15,12,41,0.85)';ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-        ctx.fillStyle='white';ctx.font='bold 24px';ctx.textAlign='center';ctx.fillText('🎨 السكينات',BASE_WIDTH/2,45);
-        const skins=[{id:'default',name:'الأخضر',cost:0},{id:'gold',name:'الذهبي',cost:200},{id:'neon',name:'النيون',cost:350}];
-        skins.forEach((s,i)=>{
-            const y=100+i*90, unlocked=unlockedSkins.includes(s.id);
-            ctx.fillStyle=unlocked?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.03)';
-            roundRect(30,y,340,75,14);
-            ctx.fillStyle=s.id==='default'?'#a8c200':s.id==='gold'?'#ffd700':'#0ff';
-            ctx.beginPath();ctx.arc(80,y+37,22,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle='white';ctx.font='16px';ctx.textAlign='left';ctx.fillText(s.name,120,y+30);
-            if(currentSkin===s.id) ctx.fillText('✅',290,y+30);
-            else if(!unlocked) {
-                if(coins>=s.cost && s.cost>0) drawButton(240,y+30,80,30,'شراء','#00c853','#64dd17');
-                else if(s.cost>0) ctx.fillText('🔒 '+s.cost,290,y+30);
-            } else if(currentSkin!==s.id) drawButton(240,y+30,80,30,'اختيار','#2196f3','#1976d2');
-        });
-        drawButton(100,540,200,42,'رجوع','#546e7a','#455a64');
-    }
+}else{
 
-    function drawGameOverScreen(){
-        ctx.fillStyle='rgba(10,8,30,0.85)';ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-        ctx.fillStyle='white';ctx.font='bold 32px';ctx.textAlign='center';ctx.fillText('انتهت الجولة!',BASE_WIDTH/2,130);
-        ctx.font='24px';ctx.fillText(Math.floor(score)+' نقطة',BASE_WIDTH/2,175);
-        ctx.fillStyle='#ffd700';ctx.font='16px';ctx.fillText('🪙 +'+coinsEarned+' عملات  |  ⭐ '+starsCollected+' نجوم',BASE_WIDTH/2,215);
-        if(Math.floor(score)>=highScore&&highScore>0){ ctx.fillStyle='#ffeb3b';ctx.font='bold 20px';ctx.fillText('🎉 رقم قياسي!',BASE_WIDTH/2,250);}
-        drawButton(80,300,240,50,'العب مرة أخرى','#ff6d00','#ff3d00');
-        drawButton(80,365,240,42,'القائمة الرئيسية','#546e7a','#455a64');
-    }
+alert(
+"بيانات الدخول غير صحيحة"
+);
 
-    function drawHUD(){
-        ctx.fillStyle='rgba(0,0,0,0.5)';roundRect(BASE_WIDTH-130,10,115,45,12);
-        ctx.fillStyle='white';ctx.font='bold 17px';ctx.textAlign='right';ctx.fillText(Math.floor(score),BASE_WIDTH-22,32);
-        ctx.font='11px';ctx.fillStyle='#aaa';ctx.fillText('النقاط',BASE_WIDTH-22,48);
-        if(comboCount>1){ ctx.fillStyle='rgba(255,80,0,0.85)';roundRect(BASE_WIDTH/2-50,65,100,25,12);ctx.fillStyle='white';ctx.font='bold 14px';ctx.textAlign='center';ctx.fillText(comboCount+'×',BASE_WIDTH/2,82);}
-        ctx.fillStyle='rgba(0,0,0,0.5)';roundRect(10,10,90,30,10);
-        ctx.fillStyle='#ffd700';ctx.font='13px';ctx.textAlign='left';ctx.fillText('🪙 '+coins,22,30);
-    }
+}
 
-    function draw(){
-        ctx.clearRect(0,0,BASE_WIDTH,BASE_HEIGHT);
-        ctx.save();
-        if(screenShake>0.3) ctx.translate((Math.random()-0.5)*screenShake*0.5, (Math.random()-0.5)*screenShake*0.5);
+}
 
-        if(currentScreen===SCREEN.MENU) drawMenuScreen();
-        else if(currentScreen===SCREEN.SHOP) drawShopScreen();
-        else if(currentScreen===SCREEN.ACHIEVEMENTS) drawAchievementsScreen();
-        else if(currentScreen===SCREEN.SKINS) drawSkinsScreen();
-        else {
-            drawBackground();
-            platforms.forEach(drawPlatform);
-            collectibles.forEach(c=>{ if(!c.collected){ ctx.fillStyle=c.type==='coin'?'#ffaa00':'#ffd700';ctx.font='20px Arial';ctx.textAlign='center';ctx.fillText(c.type==='coin'?'🪙':'⭐',c.x,c.y+Math.sin(Date.now()/280+c.bob)*5);}});
-            drawDoodler();
-            drawHUD();
-            if(missions.length){
-                ctx.fillStyle='rgba(0,0,0,0.6)';roundRect(10,BASE_HEIGHT-110,200,65,10);
-                ctx.fillStyle='white';ctx.font='11px';ctx.textAlign='left';
-                missions.forEach((m,i)=>{
-                    const col=m.done?'#69f0ae':'#eee';
-                    ctx.fillStyle=col;
-                    ctx.fillText((m.done?'✓ ':'')+m.text+` (${Math.min(m.progress,m.target)}/${m.target})`,20,BASE_HEIGHT-85+i*18);
-                });
-            }
-            if(currentScreen===SCREEN.OVER) drawGameOverScreen();
-            else if(isPaused){ ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,BASE_WIDTH,BASE_HEIGHT);ctx.fillStyle='white';ctx.font='30px';ctx.textAlign='center';ctx.fillText('⏸ متوقف',BASE_WIDTH/2,BASE_HEIGHT/2);}
-        }
-        ctx.restore();
-    }
 
-    function handleClick(mx,my){
-        if(currentScreen===SCREEN.MENU){
-            if(isInsideButton(mx,my,100,290,200,50)) resetGame();
-            else if(isInsideButton(mx,my,100,355,200,42)) currentScreen=SCREEN.SHOP;
-            else if(isInsideButton(mx,my,100,410,200,42)) currentScreen=SCREEN.ACHIEVEMENTS;
-            else if(isInsideButton(mx,my,100,465,200,42)) currentScreen=SCREEN.SKINS;
-        } else if(currentScreen===SCREEN.SHOP){
-            if(isInsideButton(mx,my,260,125,80,30)&&coins>=30){ coins-=30; ownedPowers.push('shield'); localStorage.setItem('dj_coins',coins); }
-            else if(isInsideButton(mx,my,260,195,80,30)&&coins>=25){ coins-=25; ownedPowers.push('magnet'); }
-            else if(isInsideButton(mx,my,260,265,80,30)&&coins>=40){ coins-=40; ownedPowers.push('double'); }
-            localStorage.setItem('dj_coins',coins);
-            if(isInsideButton(mx,my,100,540,200,42)) currentScreen=SCREEN.MENU;
-        } else if(currentScreen===SCREEN.ACHIEVEMENTS){
-            if(isInsideButton(mx,my,100,540,200,42)) currentScreen=SCREEN.MENU;
-        } else if(currentScreen===SCREEN.SKINS){
-            const skins=[{id:'default',cost:0},{id:'gold',cost:200},{id:'neon',cost:350}];
-            skins.forEach((s,i)=>{
-                const y=100+i*90;
-                if(!unlockedSkins.includes(s.id) && coins>=s.cost && s.cost>0 && isInsideButton(mx,my,240,y+30,80,30)){
-                    coins-=s.cost; unlockedSkins.push(s.id); localStorage.setItem('dj_coins',coins); localStorage.setItem('dj_skins',JSON.stringify(unlockedSkins));
-                } else if(unlockedSkins.includes(s.id) && currentSkin!==s.id && isInsideButton(mx,my,240,y+30,80,30)){
-                    currentSkin=s.id; localStorage.setItem('dj_currentSkin',currentSkin);
-                }
-            });
-            if(isInsideButton(mx,my,100,540,200,42)) currentScreen=SCREEN.MENU;
-        } else if(currentScreen===SCREEN.OVER){
-            if(isInsideButton(mx,my,80,300,240,50)) resetGame();
-            else if(isInsideButton(mx,my,80,365,240,42)) currentScreen=SCREEN.MENU;
-        }
-    }
+function showApp(){
 
-    canvas.addEventListener('click',e=>{
-        const rect=canvas.getBoundingClientRect();
-        const mx=(e.clientX-rect.left)/scale, my=(e.clientY-rect.top)/scale;
-        handleClick(mx,my);
-        initAudio();
-    });
-    canvas.addEventListener('touchstart',e=>{
-        e.preventDefault();
-        const rect=canvas.getBoundingClientRect();
-        const touch=e.touches[0];
-        const mx=(touch.clientX-rect.left)/scale, my=(touch.clientY-rect.top)/scale;
-        handleClick(mx,my);
-        if(currentScreen===SCREEN.PLAYING){
-            doodler.dx= touch.clientX<rect.left+rect.width/2 ? -doodler.speed : doodler.speed;
-        }
-    });
-    canvas.addEventListener('touchmove',e=>{ e.preventDefault(); if(currentScreen!==SCREEN.PLAYING)return; const rect=canvas.getBoundingClientRect(); const touch=e.touches[0]; doodler.dx= touch.clientX<rect.left+rect.width/2 ? -doodler.speed : doodler.speed; });
-    canvas.addEventListener('touchend',()=>{ doodler.dx=0; });
+document
+.getElementById("loginPage")
+.classList.add("hidden");
 
-    document.addEventListener('keydown',e=>{
-        initAudio();
-        if(currentScreen===SCREEN.PLAYING){
-            if(e.key==='ArrowLeft') doodler.dx=-doodler.speed;
-            if(e.key==='ArrowRight') doodler.dx=doodler.speed;
-            if(e.key==='p'||e.key==='P') isPaused=!isPaused;
-        }
-        if((e.key==='Enter'||e.key===' ') && currentScreen!==SCREEN.PLAYING && currentScreen!==SCREEN.SHOP && currentScreen!==SCREEN.ACHIEVEMENTS && currentScreen!==SCREEN.SKINS) resetGame();
-    });
-    document.addEventListener('keyup',e=>{ if(e.key==='ArrowLeft'||e.key==='ArrowRight') doodler.dx=0; });
+document
+.getElementById("app")
+.classList.remove("hidden");
 
-    document.getElementById('btnLeft').addEventListener('pointerdown',()=>{if(currentScreen===SCREEN.PLAYING)doodler.dx=-doodler.speed;});
-    document.getElementById('btnRight').addEventListener('pointerdown',()=>{if(currentScreen===SCREEN.PLAYING)doodler.dx=doodler.speed;});
-    document.getElementById('btnLeft').addEventListener('pointerup',()=>{if(doodler.dx<0)doodler.dx=0;});
-    document.getElementById('btnRight').addEventListener('pointerup',()=>{if(doodler.dx>0)doodler.dx=0;});
+renderAll();
 
-    createPlatforms();
-    function gameLoop(){ update(); draw(); requestAnimationFrame(gameLoop); }
-    gameLoop();
-})();
+}
+
+
+function logout(){
+
+sessionStorage.removeItem(
+"pro_admin"
+);
+
+document
+.getElementById("app")
+.classList.add("hidden");
+
+document
+.getElementById("loginPage")
+.classList.remove("hidden");
+
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function showSection(id,btn){
+
+document
+.querySelectorAll("main section")
+.forEach(
+x=>x.classList.add("hidden")
+);
+
+
+document
+.getElementById(id)
+.classList.remove("hidden");
+
+
+document
+.querySelectorAll(".navbtn")
+.forEach(
+x=>x.classList.remove("active")
+);
+
+
+if(btn){
+
+btn.classList.add("active");
+
+}
+
+
+if(id==="orders"){
+
+renderOrders();
+
+}
+
+}
+
+
+/* =========================
+   RENDER ALL
+========================= */
+
+function renderAll(){
+
+renderStats();
+
+renderProducts();
+
+renderOrders();
+
+renderRecent();
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function renderStats(){
+
+document
+.getElementById("statProducts")
+.textContent=
+products.length;
+
+
+document
+.getElementById("statOrders")
+.textContent=
+orders.length;
+
+
+document
+.getElementById("statPending")
+.textContent=
+orders.filter(
+o=>o.status==="pending"
+).length;
+
+
+const sales=
+orders
+.filter(
+o=>o.status!=="cancelled"
+)
+.reduce(
+(a,o)=>a+Number(o.total),
+0
+);
+
+
+document
+.getElementById("statSales")
+.textContent=
+"$"+sales.toFixed(2);
+
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+function renderProducts(){
+
+const grid=
+document.getElementById(
+"productGrid"
+);
+
+
+if(!products.length){
+
+grid.innerHTML=
+`
+<div style="grid-column:1/-1;text-align:center;padding:40px">
+لا توجد منتجات.
+</div>
+`;
+
+return;
+
+}
+
+
+grid.innerHTML=
+products.map(
+p=>`
+
+<article class="prod">
+
+<div class="prodimg">
+${p.icon}
+</div>
+
+<div class="prodbody">
+
+<b>
+${p.name}
+</b>
+
+<div class="muted">
+${p.cat}
+</div>
+
+<p>
+${p.desc||""}
+</p>
+
+<b>
+$${Number(p.price).toFixed(2)}
+</b>
+
+<div class="muted">
+المخزون: ${p.stock}
+</div>
+
+<div class="actions">
+
+<button
+class="btn light"
+onclick="openProduct(${p.id})"
+>
+تعديل
+</button>
+
+<button
+class="btn danger"
+onclick="deleteProduct(${p.id})"
+>
+حذف
+</button>
+
+</div>
+
+</div>
+
+</article>
+
+`
+).join("");
+
+}
+
+
+/* =========================
+   ADD / EDIT PRODUCT
+========================= */
+
+function openProduct(id){
+
+const modal=
+document.getElementById(
+"productModal"
+);
+
+modal.classList.add("show");
+
+
+if(id){
+
+const p=
+products.find(
+x=>x.id===id
+);
+
+
+document
+.getElementById("modalTitle")
+.textContent=
+"تعديل المنتج";
+
+
+document.getElementById("pid").value=
+p.id;
+
+document.getElementById("pname").value=
+p.name;
+
+document.getElementById("pcat").value=
+p.cat;
+
+document.getElementById("pprice").value=
+p.price;
+
+document.getElementById("pold").value=
+p.old||"";
+
+document.getElementById("pstock").value=
+p.stock;
+
+document.getElementById("picon").value=
+p.icon;
+
+document.getElementById("pdesc").value=
+p.desc||"";
+
+}else{
+
+document
+.getElementById("modalTitle")
+.textContent=
+"إضافة منتج";
+
+
+document
+.querySelector("#productModal form")
+.reset();
+
+
+document.getElementById("pid").value="";
+
+}
+
+}
+
+
+function closeProduct(){
+
+document
+.getElementById("productModal")
+.classList.remove("show");
+
+}
+
+
+function saveProduct(e){
+
+e.preventDefault();
+
+
+const data={
+
+name:
+document.getElementById("pname").value,
+
+cat:
+document.getElementById("pcat").value,
+
+price:
+Number(
+document.getElementById("pprice").value
+),
+
+old:
+Number(
+document.getElementById("pold").value
+)||0,
+
+stock:
+Number(
+document.getElementById("pstock").value
+),
+
+icon:
+document.getElementById("picon").value
+||"📦",
+
+desc:
+document.getElementById("pdesc").value
+
+};
+
+
+const pid=
+document.getElementById("pid").value;
+
+
+if(pid){
+
+const product=
+products.find(
+p=>p.id==pid
+);
+
+Object.assign(
+product,
+data
+);
+
+toast(
+"تم تعديل المنتج"
+);
+
+}else{
+
+data.id=
+Date.now();
+
+products.unshift(
+data
+);
+
+toast(
+"تمت إضافة المنتج"
+);
+
+}
+
+
+persist();
+
+closeProduct();
+
+renderAll();
+
+}
+
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+
+function deleteProduct(id){
+
+if(
+confirm(
+"هل تريد حذف هذا المنتج؟"
+)
+){
+
+products=
+products.filter(
+p=>p.id!==id
+);
+
+persist();
+
+renderAll();
+
+toast(
+"تم حذف المنتج"
+);
+
+}
+
+}
+
+
+/* =========================
+   ORDERS
+========================= */
+
+const labels={
+
+pending:"قيد المراجعة",
+
+confirmed:"مؤكد",
+
+shipped:"تم الشحن",
+
+done:"مكتمل",
+
+cancelled:"ملغي"
+
+};
+
+
+function renderOrders(){
+
+const filter=
+document.getElementById(
+"orderFilter"
+).value||"all";
+
+
+const arr=
+orders.filter(
+o=>
+filter==="all"
+||
+o.status===filter
+);
+
+
+const body=
+document.getElementById(
+"ordersBody"
+);
+
+
+if(!arr.length){
+
+body.innerHTML=
+`
+<tr>
+<td colspan="6"
+style="text-align:center;padding:30px">
+لا توجد طلبات.
+</td>
+</tr>
+`;
+
+return;
+
+}
+
+
+body.innerHTML=
+arr.map(
+o=>`
+
+<tr>
+
+<td>
+<b>${o.id}</b>
+</td>
+
+<td>
+${o.customer}
+</td>
+
+<td>
+${o.date}
+</td>
+
+<td>
+$${Number(o.total).toFixed(2)}
+</td>
+
+<td>
+
+<span class="status ${o.status}">
+${labels[o.status]}
+</span>
+
+</td>
+
+<td>
+
+<select
+onchange="changeOrder('${o.id}',this.value)"
+>
+
+${Object.entries(labels)
+.map(
+([key,value])=>
+`
+<option
+value="${key}"
+${o.status===key?"selected":""}
+>
+${value}
+</option>
+`
+).join("")}
+
+</select>
+
+</td>
+
+</tr>
+
+`
+).join("");
+
+}
+
+
+/* =========================
+   CHANGE ORDER
+========================= */
+
+function changeOrder(
+id,
+status
+){
+
+const order=
+orders.find(
+o=>o.id===id
+);
+
+
+if(order){
+
+order.status=
+status;
+
+}
+
+
+persist();
+
+renderAll();
+
+toast(
+"تم تحديث حالة الطلب"
+);
+
+}
+
+
+/* =========================
+   RECENT ORDERS
+========================= */
+
+function renderRecent(){
+
+const box=
+document.getElementById(
+"recentOrders"
+);
+
+
+if(!orders.length){
+
+box.innerHTML=
+`
+<div class="muted">
+لا توجد طلبات.
+</div>
+`;
+
+return;
+
+}
+
+
+box.innerHTML=
+orders
+.slice(0,3)
+.map(
+o=>`
+
+<div
+style="
+padding:12px 0;
+border-bottom:1px solid var(--line);
+display:flex;
+justify-content:space-between;
+gap:10px;
+"
+>
+
+<span>
+
+<b>
+${o.id}
+</b>
+
+—
+
+${o.customer}
+
+</span>
+
+<span>
+$${Number(o.total).toFixed(2)}
+</span>
+
+</div>
+
+`
+)
+.join("");
+
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+function saveSettings(){
+
+const storeName=
+document.getElementById(
+"storeName"
+).value;
+
+
+const whatsapp=
+document.getElementById(
+"whatsapp"
+).value;
+
+
+const currency=
+document.getElementById(
+"currency"
+).value;
+
+
+localStorage.setItem(
+"store_name",
+storeName
+);
+
+localStorage.setItem(
+"store_whatsapp",
+whatsapp
+);
+
+localStorage.setItem(
+"store_currency",
+currency
+);
+
+
+toast(
+"تم حفظ الإعدادات"
+);
+
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+function toast(message){
+
+const box=
+document.getElementById(
+"toast"
+);
+
+box.textContent=
+message;
+
+box.style.display=
+"block";
+
+
+setTimeout(
+()=>{
+box.style.display="none";
+},
+1800
+);
+
+}
+
+
+/* =========================
+   AUTO LOGIN
+========================= */
+
+if(
+sessionStorage.getItem(
+"pro_admin"
+)
+){
+
+showApp();
+
+}
+
 </script>
+
 </body>
 </html>
